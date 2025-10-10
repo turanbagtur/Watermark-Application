@@ -1,0 +1,3468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Professional Watermark Application</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Mode Colors */
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #64748b;
+            --background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --surface-3: #e2e8f0;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --error: #dc2626;
+            --warning: #d97706;
+            --success: #059669;
+            --info: #0284c7;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.12);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Mode Colors */
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #64748b;
+            --background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --surface: #1e293b;
+            --surface-2: #334155;
+            --surface-3: #475569;
+            --text: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3af;
+            --border: #334155;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --info: #06b6d4;
+            --shadow: rgba(0, 0, 0, 0.25);
+            --shadow-hover: rgba(0, 0, 0, 0.35);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .header-content p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .help-btn {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .help-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .upload-box {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 35px;
+            border: 3px dashed var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 49%, var(--primary) 50%, var(--primary) 51%, transparent 52%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .upload-box.dragover {
+            border-color: var(--primary);
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.02);
+        }
+
+        .upload-box.dragover::before {
+            opacity: 0.1;
+        }
+
+        .upload-box:hover {
+            border-color: var(--primary);
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px var(--shadow-hover);
+        }
+
+        .upload-box.has-image {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            opacity: 0.8;
+        }
+
+        .upload-box h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .upload-box p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .file-info {
+            background: var(--surface-2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+        }
+
+        .gallery-item .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .gallery-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .preview-section {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .preview-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-canvas {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px var(--shadow);
+            display: block;
+            margin: 0 auto;
+        }
+
+        .settings-panel {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+        }
+
+        .settings-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tab-btn {
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            background: var(--surface-2);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .setting-item label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .setting-value {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .setting-item input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: var(--surface-3);
+            outline: none;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .setting-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .setting-item input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .setting-item input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .setting-item input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .setting-item select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface-2);
+            color: var(--text);
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-picker {
+            width: 50px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .mode-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px 20px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--surface);
+            color: var(--text);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px var(--shadow-hover);
+        }
+
+        .position-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+            background: var(--surface-2);
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .position-btn {
+            padding: 20px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--surface);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .position-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .position-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .process-section {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 35px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .process-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .process-btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .process-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .process-btn:hover::before {
+            left: 100%;
+        }
+
+        .process-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.6);
+        }
+
+        .process-btn:disabled {
+            background: var(--surface-3);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .secondary-btn {
+            background: var(--surface-2);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .secondary-btn:hover {
+            background: var(--surface-3);
+            box-shadow: 0 8px 20px var(--shadow-hover);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+            padding: 20px;
+            background: var(--surface-2);
+            border-radius: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            margin-top: 25px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 35px;
+            background: var(--surface-2);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 5px var(--shadow);
+            display: none;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 25%, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0.1) 50%, transparent 50%, transparent 75%, rgba(255, 255, 255, 0.1) 75%);
+            background-size: 20px 20px;
+            animation: progress-animation 1s linear infinite;
+        }
+
+        @keyframes progress-animation {
+            0% { transform: translateX(-20px); }
+            100% { transform: translateX(20px); }
+        }
+
+        .results-section {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 35px;
+            margin-top: 25px;
+            display: none;
+        }
+
+        .results-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .results-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .download-all-btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            background: var(--warning);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .download-all-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+        }
+
+        .clear-results-btn {
+            background: var(--error);
+        }
+
+        .clear-results-btn:hover {
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+        }
+
+        .result-item {
+            border: 2px solid var(--border);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--surface);
+        }
+
+        .result-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px var(--shadow-hover);
+            border-color: var(--primary);
+        }
+
+        .result-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .result-item .file-name {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .result-item .file-size {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+        }
+
+        .download-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .download-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .download-btn.png {
+            background: var(--success);
+        }
+
+        .download-btn.jpg {
+            background: var(--info);
+        }
+
+        .download-btn.webp {
+            background: var(--secondary);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 18px 25px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            max-width: 400px;
+            box-shadow: 0 8px 25px var(--shadow);
+            animation: slideInAlert 0.4s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-error { background: var(--error); }
+        .alert-warning { background: var(--warning); }
+        .alert-success { background: var(--success); }
+        .alert-info { background: var(--info); }
+
+        .alert .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .alert .close-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideInAlert {
+            from { 
+                transform: translateX(100%) scale(0.8);
+                opacity: 0;
+            }
+            to { 
+                transform: translateX(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-content {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--surface-3);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .keyboard-shortcuts {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            box-shadow: 0 4px 15px var(--shadow);
+            max-width: 250px;
+            z-index: 100;
+        }
+
+        .shortcut-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .shortcut-key {
+            background: var(--surface-2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.75rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-content h1 {
+                font-size: 2rem;
+            }
+            
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .mode-buttons {
+                flex-direction: column;
+            }
+            
+            .mode-btn {
+                min-width: auto;
+            }
+            
+            .process-controls {
+                flex-direction: column;
+            }
+            
+            .stats {
+                gap: 20px;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .alert {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+
+        /* Accessibility Improvements */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High Contrast Mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --border: #000000;
+                --shadow: rgba(0, 0, 0, 0.5);
+            }
+            
+            [data-theme="dark"] {
+                --border: #ffffff;
+            }
+        }
+
+        /* Focus Styles for Accessibility */
+        .upload-box:focus-visible,
+        .mode-btn:focus-visible,
+        .position-btn:focus-visible,
+        .process-btn:focus-visible,
+        .download-btn:focus-visible,
+        .tab-btn:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        /* Print Styles */
+        @media print {
+            .header-controls,
+            .process-section,
+            .keyboard-shortcuts {
+                display: none;
+            }
+        }
+
+        /* Preset Butonları Stili */
+        .preset-btn {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            color: var(--text);
+        }
+
+        .preset-btn:hover {
+            background: var(--surface-3);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px var(--shadow-hover);
+        }
+
+        .preset-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Gelişmiş Progress Bar */
+        .advanced-progress {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .progress-details {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .speed-indicator {
+            background: var(--surface-2);
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Performance Badges */
+        .perf-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin: 0 5px;
+        }
+
+        .perf-badge.fast { background: var(--success); color: white; }
+        .perf-badge.medium { background: var(--warning); color: white; }
+        .perf-badge.slow { background: var(--error); color: white; }
+
+        /* Favori Yıldız Butonu */
+        .favorite-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .favorite-btn:hover,
+        .favorite-btn.active {
+            color: #ffd700;
+            transform: scale(1.2);
+        }
+
+        /* Smart Suggestions Modal */
+        .suggestion-item {
+            background: var(--surface-2);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary);
+        }
+
+        .apply-suggestion-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 5px 12px;
+            margin-top: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+        }
+
+        .apply-suggestion-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Quick Actions */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .quick-action-card {
+            background: var(--surface-2);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-card:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px var(--shadow-hover);
+        }
+
+        /* Enhanced File Info */
+        .file-info.enhanced {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-specs {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Loading States */
+        .processing-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: var(--warning);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* Success States */
+        .success-indicator {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        /* Smart Tooltips */
+        .tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: var(--surface);
+            padding: 6px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header" role="banner">
+            <div class="header-content">
+                <h1>🎨 Advanced Professional Watermark Application</h1>
+                <p>Professional watermarking with real-time preview and advanced features</p>
+            </div>
+            <div class="header-controls">
+                <a href="https://ko-fi.com/solderett" target="_blank" class="kofi-btn" style="background: #13C3FF; color: white; text-decoration: none; padding: 12px 20px; border-radius: 50px; font-weight: 600; margin-right: 15px; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s ease;" onmouseover="this.style.background='#0FB3EE'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#13C3FF'; this.style.transform='translateY(0)'">
+                    ☕ Support Me
+                </a>
+                <button class="help-btn" onclick="showHelp()" aria-label="Help">
+                    ❓ Help
+                </button>
+                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                    🌙 Dark Mode
+                </button>
+            </div>
+        </header>
+
+        <main role="main">
+            <section class="upload-section" aria-label="File upload">
+                <div class="upload-box" id="mainImageBox" tabindex="0" role="button" aria-label="Upload main images">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                            <circle cx="12" cy="13" r="4"/>
+                        </svg>
+                    </div>
+                    <h3>Upload Main Images</h3>
+                    <p>Click or drag images here (PNG, JPG, WEBP)</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 10MB</p>
+                    <input type="file" id="mainImageInput" accept="image/*" multiple aria-label="Select main image files">
+                    <div class="image-gallery" id="mainGallery" role="list"></div>
+                    <button class="clear-images-btn" onclick="clearAllImages(event)" style="display: none; margin-top: 15px; padding: 8px 16px; background: var(--error); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 10; position: relative;" id="clearImagesBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/>
+                        </svg>
+                        Clear All
+                    </button>
+                </div>
+
+                <div class="upload-box" id="watermarkBox" tabindex="0" role="button" aria-label="Upload watermark">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                        </svg>
+                    </div>
+                    <h3>Upload Watermark/Logo</h3>
+                    <p>We recommend transparent PNG logos</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 5MB</p>
+                    <input type="file" id="watermarkInput" accept="image/*" aria-label="Select watermark file">
+                </div>
+            </section>
+
+            <section class="preview-section" id="previewSection" aria-label="Preview">
+                <h2 class="preview-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Real-time Preview
+                </h2>
+                <canvas class="preview-canvas" id="previewCanvas" aria-label="Watermark preview"></canvas>
+                <div class="file-info" id="previewInfo"></div>
+            </section>
+
+            <section class="settings-panel" aria-label="Settings">
+                <h2 class="settings-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1 1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Watermark Settings
+                </h2>
+                
+                <div class="settings-tabs" role="tablist">
+                    <button class="tab-btn active" role="tab" aria-selected="true" aria-controls="image-tab" id="image-tab-btn" onclick="switchTab('image')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
+                        </svg>
+                        Image
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="text-tab" id="text-tab-btn" onclick="switchTab('text')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
+                        </svg>
+                        Text
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="effects-tab" id="effects-tab-btn" onclick="switchTab('effects')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        Effects
+                    </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="export-tab" id="export-tab-btn" onclick="switchTab('export')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="7,10 12,15 17,10"/>
+                            <line x1="12" y1="15" x2="12" y2="3"/>
+                        </svg>
+                        Export
+                    </button>
+                </div>
+
+                <div class="tab-content active" id="image-tab" role="tabpanel" aria-labelledby="image-tab-btn">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="countSlider">Watermark Count: <span class="setting-value" id="countValue">5</span></label>
+                            <input type="range" id="countSlider" min="1" max="50" value="5" aria-describedby="count-desc">
+                            <small id="count-desc">Used in random and grid modes</small>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="opacitySlider">Opacity: <span class="setting-value" id="opacityValue">50</span>%</label>
+                            <input type="range" id="opacitySlider" min="0" max="100" value="50">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="sizeSlider">Size: <span class="setting-value" id="sizeValue">15</span>%</label>
+                            <input type="range" id="sizeSlider" min="2" max="80" value="15">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="rotationSlider">Rotation: <span class="setting-value" id="rotationValue">0</span>°</label>
+                            <input type="range" id="rotationSlider" min="-180" max="180" value="0">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="blendMode">Blend Mode:</label>
+                            <select id="blendMode">
+                                <option value="normal">Normal</option>
+                                <option value="multiply">Multiply</option>
+                                <option value="screen">Screen</option>
+                                <option value="overlay">Overlay</option>
+                                <option value="soft-light">Soft Light</option>
+                                <option value="hard-light">Hard Light</option>
+                                <option value="color-dodge">Color Dodge</option>
+                                <option value="color-burn">Color Burn</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="paddingSlider">Padding: <span class="setting-value" id="paddingValue">20</span>px</label>
+                            <input type="range" id="paddingSlider" min="0" max="100" value="20">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="text-tab" role="tabpanel" aria-labelledby="text-tab-btn">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="textContent">Text Content:</label>
+                            <input type="text" id="textContent" placeholder="© 2024 Company Name" maxlength="100">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="textSize">Text Size: <span class="setting-value" id="textSizeValue">24</span>px</label>
+                            <input type="range" id="textSizeSlider" min="8" max="120" value="24">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="fontFamily">Font:</label>
+                            <select id="fontFamily">
+                                <option value="Arial">Arial</option>
+                                <option value="Helvetica">Helvetica</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Impact">Impact</option>
+                            </select>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>Text Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="textColor" class="color-picker" value="#ffffff">
+                                <span id="textColorValue">#ffffff</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="textStroke">Stroke Width: <span class="setting-value" id="textStrokeValue">2</span>px</label>
+                            <input type="range" id="textStrokeSlider" min="0" max="10" value="2">
+                        </div>
+
+                        <div class="setting-item">
+                            <label>Stroke Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="textStrokeColor" class="color-picker" value="#000000">
+                                <span id="textStrokeColorValue">#000000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="effects-tab" role="tabpanel" aria-labelledby="effects-tab-btn">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="shadowBlur">Shadow Blur: <span class="setting-value" id="shadowBlurValue">0</span>px</label>
+                            <input type="range" id="shadowBlurSlider" min="0" max="50" value="0">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="shadowOffset">Shadow Distance: <span class="setting-value" id="shadowOffsetValue">0</span>px</label>
+                            <input type="range" id="shadowOffsetSlider" min="0" max="20" value="0">
+                        </div>
+
+                        <div class="setting-item">
+                            <label>Shadow Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="shadowColor" class="color-picker" value="#000000">
+                                <span id="shadowColorValue">#000000</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="brightness">Brightness: <span class="setting-value" id="brightnessValue">100</span>%</label>
+                            <input type="range" id="brightnessSlider" min="20" max="200" value="100">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="contrast">Contrast: <span class="setting-value" id="contrastValue">100</span>%</label>
+                            <input type="range" id="contrastSlider" min="20" max="200" value="100">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="saturation">Saturation: <span class="setting-value" id="saturationValue">100</span>%</label>
+                            <input type="range" id="saturationSlider" min="0" max="200" value="100">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-buttons" role="group" aria-label="Watermark distribution modes">
+                    <button class="mode-btn active" onclick="setMode('position')" aria-pressed="true">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Specific Position
+                    </button>
+                    <button class="mode-btn" onclick="setMode('random')" aria-pressed="false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="6" height="6" rx="1"/>
+                            <rect x="15" y="3" width="6" height="6" rx="1"/>
+                            <rect x="3" y="15" width="6" height="6" rx="1"/>
+                            <rect x="15" y="15" width="6" height="6" rx="1"/>
+                        </svg>
+                        Random Distribution
+                    </button>
+                    <button class="mode-btn" onclick="setMode('grid')" aria-pressed="false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                        </svg>
+                        Grid Distribution
+                    </button>
+                    <button class="mode-btn" onclick="setMode('pattern')" aria-pressed="false">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 6l-9.5 9.5-5-5L1 18"/>
+                            <path d="M17 6h6v6"/>
+                        </svg>
+                        Pattern Distribution
+                    </button>
+                </div>
+
+                <div class="position-grid" id="positionGrid" role="group" aria-label="Position options">
+                    <button class="position-btn active" onclick="setPosition('top-left')" aria-pressed="true">↖ Top Left</button>
+                    <button class="position-btn" onclick="setPosition('top-center')" aria-pressed="false">↑ Top Center</button>
+                    <button class="position-btn" onclick="setPosition('top-right')" aria-pressed="false">↗ Top Right</button>
+                    <button class="position-btn" onclick="setPosition('left-center')" aria-pressed="false">← Left Center</button>
+                    <button class="position-btn" onclick="setPosition('center')" aria-pressed="false">• Center</button>
+                    <button class="position-btn" onclick="setPosition('right-center')" aria-pressed="false">→ Right Center</button>
+                    <button class="position-btn" onclick="setPosition('bottom-left')" aria-pressed="false">↙ Bottom Left</button>
+                    <button class="position-btn" onclick="setPosition('bottom-center')" aria-pressed="false">↓ Bottom Center</button>
+                    <button class="position-btn" onclick="setPosition('bottom-right')" aria-pressed="false">↘ Bottom Right</button>
+                </div>
+
+                <!-- Advanced Export Settings -->
+                <div class="tab-content" id="export-tab" role="tabpanel" aria-labelledby="export-tab-btn" style="display: none;">
+                    <h3 style="color: var(--text); margin-bottom: 20px;">📁 Advanced Export Options</h3>
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="jpgQuality">JPG Quality: <span class="setting-value" id="jpgQualityValue">95</span>%</label>
+                            <input type="range" id="jpgQualitySlider" min="60" max="100" value="95">
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label for="webpQuality">WEBP Quality: <span class="setting-value" id="webpQualityValue">90</span>%</label>
+                            <input type="range" id="webpQualitySlider" min="60" max="100" value="90">
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label>Bulk Download Formats:</label>
+                            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                                <label><input type="checkbox" id="exportPNG" checked> PNG</label>
+                                <label><input type="checkbox" id="exportJPG"> JPG</label>
+                                <label><input type="checkbox" id="exportWEBP"> WEBP</label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label>Performance Mode:</label>
+                            <select id="performanceMode">
+                                <option value="balanced">Balanced</option>
+                                <option value="quality">High Quality</option>
+                                <option value="speed">High Speed</option>
+                            </select>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <label>Multi-format Download:</label>
+                            <button class="process-btn secondary-btn" onclick="downloadAllFormats()" style="width: 100%; margin-top: 10px;">
+                                📦 Download All Formats
+                            </button>
+                            <small style="color: var(--text-muted); margin-top: 8px; display: block;">
+                                Downloads selected formats as ZIP file
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Presets -->
+                <div class="quick-presets" style="margin-top: 25px;">
+                    <h3 style="color: var(--text); margin-bottom: 15px;">⚡ Quick Settings</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <button class="preset-btn" onclick="applyPreset('subtle')" data-preset="subtle">
+                            <div style="font-weight: 600;">Subtle Watermark</div>
+                            <small>Low opacity, small size</small>
+                        </button>
+                        <button class="preset-btn" onclick="applyPreset('standard')" data-preset="standard">
+                            <div style="font-weight: 600;">Standard</div>
+                            <small>Medium opacity, normal size</small>
+                        </button>
+                        <button class="preset-btn" onclick="applyPreset('bold')" data-preset="bold">
+                            <div style="font-weight: 600;">Bold</div>
+                            <small>High opacity, large size</small>
+                        </button>
+                        <button class="preset-btn" onclick="applyPreset('corner')" data-preset="corner">
+                            <div style="font-weight: 600;">Corner Logo</div>
+                            <small>Bottom right corner, small</small>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-grid" style="margin-top: 20px;">
+                    <div class="setting-item">
+                        <label>Preset Management:</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="savePreset()">💾 Save</button>
+                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="loadPreset()">📁 Load</button>
+                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="resetSettings()">🔄 Reset</button>
+                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="saveToFavorites()">⭐ Favorite</button>
+                        </div>
+                    </div>
+                </div>
+            
+                <!-- Remove this script block as function is defined below -->
+            </section>
+
+            <section class="process-section" aria-label="Processing">
+                <div class="process-controls">
+                    <button class="process-btn" id="processBtn" onclick="processAllImages()" disabled aria-describedby="process-desc">
+                        🚀 Process All Images
+                    </button>
+                    <button class="process-btn secondary-btn" onclick="previewSingle()" id="previewBtn" disabled>
+                        👁️ Preview
+                    </button>
+                    <button class="process-btn secondary-btn" onclick="undoLast()" id="undoBtn" disabled>
+                        ↶ Undo
+                    </button>
+                </div>
+                <small id="process-desc">Activated after uploading main images and watermark</small>
+                
+                <div class="stats" id="stats" style="display: none;">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalImages">0</span>
+                        <div class="stat-label">Total Images</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="processedImages">0</span>
+                        <div class="stat-label">Processed</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="processingTime">0</span>
+                        <div class="stat-label">Time (s)</div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalSize">0</span>
+                        <div class="stat-label">Total MB</div>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar">
+                        <div class="progress-fill" id="progressFill">0%</div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="results-section" id="resultsSection" aria-label="Results">
+                <h2 class="results-title">
+                    ✅ Processed Images
+                </h2>
+                <div class="results-controls">
+                    <button class="download-all-btn" onclick="downloadAllImages()">
+                        📦 Download All (ZIP)
+                    </button>
+                    <button class="download-all-btn clear-results-btn" onclick="clearResults()">
+                        🗑️ Clear Results
+                    </button>
+                    <button class="download-all-btn secondary-btn" onclick="shareResults()">
+                        📤 Share
+                    </button>
+                </div>
+                <div class="results-grid" id="resultsGrid"></div>
+            </section>
+        </main>
+
+        <div class="keyboard-shortcuts" id="keyboardShortcuts">
+            <h4 style="margin-bottom: 10px; color: var(--text);">Keyboard Shortcuts</h4>
+            <div class="shortcut-item">
+                <span>Select File</span>
+                <kbd class="shortcut-key">Ctrl+O</kbd>
+            </div>
+            <div class="shortcut-item">
+                <span>Process</span>
+                <kbd class="shortcut-key">Ctrl+Enter</kbd>
+            </div>
+            <div class="shortcut-item">
+                <span>Undo</span>
+                <kbd class="shortcut-key">Ctrl+Z</kbd>
+            </div>
+            <div class="shortcut-item">
+                <span>Toggle Theme</span>
+                <kbd class="shortcut-key">Ctrl+T</kbd>
+            </div>
+            <div class="shortcut-item">
+                <span>Help</span>
+                <kbd class="shortcut-key">F1</kbd>
+            </div>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script>
+        // Global Variables and Configuration
+        const CONFIG = {
+            MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
+            MAX_WATERMARK_SIZE: 5 * 1024 * 1024, // 5MB
+            SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
+            MAX_CANVAS_SIZE: 8192,
+            WORKER_ENABLED: typeof Worker !== 'undefined'
+        };
+
+        // Application State
+        class AppState {
+            constructor() {
+                this.mainImages = [];
+                this.watermark = null;
+                this.processedResults = [];
+                this.undoStack = [];
+                this.settings = {
+                    // Image settings
+                    count: 5,
+                    opacity: 50,
+                    size: 15,
+                    rotation: 0,
+                    mode: 'position',
+                    position: 'top-left',
+                    blendMode: 'normal',
+                    padding: 20,
+                    // Text settings
+                    textContent: '',
+                    textSize: 24,
+                    fontFamily: 'Arial',
+                    textColor: '#ffffff',
+                    textStroke: 2,
+                    textStrokeColor: '#000000',
+                    // Effects
+                    shadowBlur: 0,
+                    shadowOffset: 0,
+                    shadowColor: '#000000',
+                    brightness: 100,
+                    contrast: 100,
+                    saturation: 100
+                };
+                this.theme = localStorage.getItem('theme') || 'light';
+                this.previewMode = false;
+                this.processing = false;
+            }
+
+            saveState() {
+                this.undoStack.push({
+                    settings: { ...this.settings },
+                    timestamp: Date.now()
+                });
+                if (this.undoStack.length > 10) {
+                    this.undoStack.shift();
+                }
+                this.updateUndoButton();
+            }
+
+            undoState() {
+                if (this.undoStack.length > 0) {
+                    const previousState = this.undoStack.pop();
+                    this.settings = previousState.settings;
+                    this.updateAllSliders();
+                    this.updateUndoButton();
+                    this.updatePreview();
+                }
+            }
+
+            updateUndoButton() {
+                const undoBtn = document.getElementById('undoBtn');
+                undoBtn.disabled = this.undoStack.length === 0;
+            }
+        }
+
+        // Error Handler Class
+        class ErrorHandler {
+            static show(message, type = 'error', duration = 5000) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${type}`;
+                
+                const icon = {
+                    error: '❌',
+                    warning: '⚠️',
+                    success: '✅',
+                    info: 'ℹ️'
+                }[type] || '❌';
+
+                alertDiv.innerHTML = `
+                    <span>${icon} ${message}</span>
+                    <button class="close-btn" onclick="this.parentElement.remove()" aria-label="Close">&times;</button>
+                `;
+                
+                document.body.appendChild(alertDiv);
+                
+                if (duration > 0) {
+                    setTimeout(() => {
+                        if (alertDiv.parentElement) {
+                            alertDiv.remove();
+                        }
+                    }, duration);
+                }
+                
+                // Announce to screen readers
+                this.announce(message);
+            }
+
+            static announce(message) {
+                const announcement = document.createElement('div');
+                announcement.setAttribute('aria-live', 'polite');
+                announcement.setAttribute('aria-atomic', 'true');
+                announcement.className = 'sr-only';
+                announcement.textContent = message;
+                document.body.appendChild(announcement);
+                setTimeout(() => announcement.remove(), 1000);
+            }
+        }
+
+        // File Validation
+        class FileValidator {
+            static validate(file, isWatermark = false) {
+                const maxSize = isWatermark ? CONFIG.MAX_WATERMARK_SIZE : CONFIG.MAX_FILE_SIZE;
+                
+                if (!CONFIG.SUPPORTED_FORMATS.includes(file.type)) {
+                    throw new Error(`Unsupported file format: ${file.type}`);
+                }
+                
+                if (file.size > maxSize) {
+                    const maxSizeMB = Math.round(maxSize / (1024 * 1024));
+                    throw new Error(`File size cannot exceed ${maxSizeMB}MB`);
+                }
+                
+                return true;
+            }
+
+            static validateImage(img) {
+                if (img.width > CONFIG.MAX_CANVAS_SIZE || img.height > CONFIG.MAX_CANVAS_SIZE) {
+                    throw new Error(`Image size too large (Max: ${CONFIG.MAX_CANVAS_SIZE}px)`);
+                }
+                return true;
+            }
+        }
+
+        // Performance Manager - Enhanced
+        class PerformanceManager {
+            static optimizeCanvas(img) {
+                const maxDimension = 2000;
+                if (img.width <= maxDimension && img.height <= maxDimension) {
+                    return { width: img.width, height: img.height, scale: 1 };
+                }
+                
+                const scale = Math.min(maxDimension / img.width, maxDimension / img.height);
+                return {
+                    width: Math.round(img.width * scale),
+                    height: Math.round(img.height * scale),
+                    scale: scale
+                };
+            }
+
+            static cleanup(canvas) {
+                if (canvas && canvas.getContext) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    // Force garbage collection hint
+                    canvas.width = canvas.height = 0;
+                }
+            }
+
+            static formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            static measureTime(startTime) {
+                return ((performance.now() - startTime) / 1000).toFixed(1);
+            }
+
+            // Advanced Performance Monitoring
+            static getPerformanceLevel(processingTime, fileSize) {
+                const ratio = processingTime / (fileSize / 1024 / 1024); // time per MB
+                if (ratio < 0.5) return { level: 'fast', color: 'var(--success)', badge: 'FAST' };
+                if (ratio < 2) return { level: 'medium', color: 'var(--warning)', badge: 'MEDIUM' };
+                return { level: 'slow', color: 'var(--error)', badge: 'SLOW' };
+            }
+
+            // Memory usage estimation
+            static estimateMemoryUsage(images) {
+                return images.reduce((total, img) => {
+                    return total + (img.img.width * img.img.height * 4); // RGBA
+                }, 0);
+            }
+
+            // Image compression before processing
+            static async compressImage(canvas, quality = 0.8) {
+                return new Promise(resolve => {
+                    canvas.toBlob(resolve, 'image/jpeg', quality);
+                });
+            }
+
+            // Batch processing with concurrency control
+            static async processBatch(items, processor, concurrency = 3) {
+                const results = [];
+                for (let i = 0; i < items.length; i += concurrency) {
+                    const batch = items.slice(i, i + concurrency);
+                    const batchResults = await Promise.all(
+                        batch.map(item => processor(item))
+                    );
+                    results.push(...batchResults);
+                    
+                    // Small delay to prevent UI blocking
+                    await new Promise(resolve => setTimeout(resolve, 10));
+                }
+                return results;
+            }
+
+            // Progressive canvas rendering for large images
+            static renderProgressive(canvas, img, onProgress) {
+                const ctx = canvas.getContext('2d');
+                const chunkSize = 500; // pixels
+                let y = 0;
+                
+                function renderChunk() {
+                    const height = Math.min(chunkSize, img.height - y);
+                    if (height <= 0) {
+                        onProgress(100);
+                        return;
+                    }
+                    
+                    ctx.drawImage(img, 0, y, img.width, height, 0, y, canvas.width, height);
+                    y += height;
+                    
+                    const progress = (y / img.height) * 100;
+                    onProgress(progress);
+                    
+                    if (y < img.height) {
+                        requestAnimationFrame(renderChunk);
+                    }
+                }
+                
+                requestAnimationFrame(renderChunk);
+            }
+        }
+
+        // Initialize application state
+        const appState = new AppState();
+
+        // DOM Elements
+        const elements = {
+            mainImageBox: document.getElementById('mainImageBox'),
+            watermarkBox: document.getElementById('watermarkBox'),
+            mainImageInput: document.getElementById('mainImageInput'),
+            watermarkInput: document.getElementById('watermarkInput'),
+            mainGallery: document.getElementById('mainGallery'),
+            previewSection: document.getElementById('previewSection'),
+            previewCanvas: document.getElementById('previewCanvas'),
+            previewInfo: document.getElementById('previewInfo'),
+            processBtn: document.getElementById('processBtn'),
+            previewBtn: document.getElementById('previewBtn'),
+            undoBtn: document.getElementById('undoBtn'),
+            progressBar: document.getElementById('progressBar'),
+            progressFill: document.getElementById('progressFill'),
+            resultsSection: document.getElementById('resultsSection'),
+            resultsGrid: document.getElementById('resultsGrid'),
+            stats: document.getElementById('stats'),
+            positionGrid: document.getElementById('positionGrid'),
+            keyboardShortcuts: document.getElementById('keyboardShortcuts')
+        };
+
+        // Theme Management
+        function toggleTheme() {
+            appState.theme = appState.theme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', appState.theme);
+            localStorage.setItem('theme', appState.theme);
+            
+            const themeBtn = document.querySelector('.theme-toggle');
+            themeBtn.textContent = appState.theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+            
+            ErrorHandler.show(
+                `${appState.theme === 'light' ? 'Light' : 'Dark'} theme activated`,
+                'success',
+                2000
+            );
+        }
+
+        // Initialize theme
+        function initializeTheme() {
+            document.documentElement.setAttribute('data-theme', appState.theme);
+            const themeBtn = document.querySelector('.theme-toggle');
+            themeBtn.textContent = appState.theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+        }
+
+        // Tab Management
+        function switchTab(tabName) {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            document.getElementById(`${tabName}-tab-btn`).classList.add('active');
+            document.getElementById(`${tabName}-tab-btn`).setAttribute('aria-selected', 'true');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            appState.saveState();
+        }
+
+        // Drag and Drop Handlers
+        function setupDragAndDrop() {
+            const boxes = [elements.mainImageBox, elements.watermarkBox];
+            
+            boxes.forEach(box => {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    box.addEventListener(eventName, preventDefaults, false);
+                });
+                
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    box.addEventListener(eventName, () => box.classList.add('dragover'), false);
+                });
+                
+                ['dragleave', 'drop'].forEach(eventName => {
+                    box.addEventListener(eventName, () => box.classList.remove('dragover'), false);
+                });
+            });
+            
+            elements.mainImageBox.addEventListener('drop', handleMainImageDrop, false);
+            elements.watermarkBox.addEventListener('drop', handleWatermarkDrop, false);
+        }
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleMainImageDrop(e) {
+            const files = Array.from(e.dataTransfer.files).filter(file =>
+                CONFIG.SUPPORTED_FORMATS.includes(file.type)
+            );
+            files.forEach(file => loadImage(file, 'main'));
+        }
+
+        function handleWatermarkDrop(e) {
+            const file = e.dataTransfer.files[0];
+            if (file && CONFIG.SUPPORTED_FORMATS.includes(file.type)) {
+                loadImage(file, 'watermark');
+            }
+        }
+
+        // Click Handlers
+        function setupClickHandlers() {
+            elements.mainImageBox.addEventListener('click', () => {
+                elements.mainImageInput.click();
+            });
+            
+            elements.watermarkBox.addEventListener('click', () => {
+                elements.watermarkInput.click();
+            });
+            
+            // Keyboard support
+            elements.mainImageBox.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    elements.mainImageInput.click();
+                }
+            });
+            
+            elements.watermarkBox.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    elements.watermarkInput.click();
+                }
+            });
+        }
+
+        // File Input Handlers
+        function setupFileInputs() {
+            elements.mainImageInput.addEventListener('change', (e) => {
+                Array.from(e.target.files).forEach(file => loadImage(file, 'main'));
+            });
+            
+            elements.watermarkInput.addEventListener('change', (e) => {
+                if (e.target.files[0]) {
+                    loadImage(e.target.files[0], 'watermark');
+                }
+            });
+        }
+
+        // Image Loading
+        async function loadImage(file, type) {
+            try {
+                FileValidator.validate(file, type === 'watermark');
+                
+                const startTime = performance.now();
+                
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            try {
+                                FileValidator.validateImage(img);
+                                
+                                if (type === 'main') {
+                                    appState.mainImages.push({
+                                        img,
+                                        name: file.name,
+                                        size: file.size,
+                                        lastModified: file.lastModified
+                                    });
+                                    updateMainGallery();
+                                    updateProcessButtons();
+                                    
+                                    const loadTime = PerformanceManager.measureTime(startTime);
+                                    ErrorHandler.show(
+                                        `${file.name} loaded (${loadTime}s)`,
+                                        'success',
+                                        3000
+                                    );
+                                } else {
+                                    appState.watermark = img;
+                                    updateWatermarkDisplay(img, file);
+                                    updateProcessButtons();
+                                    
+                                    const loadTime = PerformanceManager.measureTime(startTime);
+                                    ErrorHandler.show(
+                                        `Watermark loaded (${loadTime}s)`,
+                                        'success',
+                                        3000
+                                    );
+                                }
+                                
+                                updatePreview();
+                                resolve();
+                            } catch (error) {
+                                ErrorHandler.show(error.message);
+                                reject(error);
+                            }
+                        };
+                        img.onerror = (e) => {
+                            const error = new Error('Failed to load image. Please check if the file is corrupted.');
+                            ErrorHandler.show(error.message);
+                            reject(error);
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.onerror = (e) => {
+                        const error = new Error('Failed to read file. Please try again.');
+                        ErrorHandler.show(error.message);
+                        reject(error);
+                    };
+                    reader.readAsDataURL(file);
+                });
+                
+            } catch (error) {
+                ErrorHandler.show(error.message);
+            }
+        }
+
+        // Update Main Gallery
+        function updateMainGallery() {
+            const gallery = elements.mainGallery;
+            const box = elements.mainImageBox;
+            
+            if (appState.mainImages.length > 0) {
+                box.classList.add('has-image');
+                gallery.innerHTML = appState.mainImages.map((item, index) => `
+                    <div class="gallery-item" role="listitem">
+                        <img src="${item.img.src}" alt="${item.name}" loading="lazy">
+                        <button class="remove-btn" onclick="removeImage(${index})" aria-label="Remove ${item.name} image">×</button>
+                    </div>
+                `).join('');
+                
+                // Show clear button
+                document.getElementById('clearImagesBtn').style.display = 'block';
+                
+                // Update file info
+                const totalSize = appState.mainImages.reduce((sum, item) => sum + item.size, 0);
+                const fileInfo = box.querySelector('.file-info') || document.createElement('div');
+                fileInfo.className = 'file-info';
+                fileInfo.innerHTML = `
+                    <strong>${appState.mainImages.length}</strong> images loaded
+                    (<strong>${PerformanceManager.formatFileSize(totalSize)}</strong>)
+                `;
+                if (!box.querySelector('.file-info')) {
+                    box.appendChild(fileInfo);
+                }
+            } else {
+                box.classList.remove('has-image');
+                gallery.innerHTML = '';
+                document.getElementById('clearImagesBtn').style.display = 'none';
+                const fileInfo = box.querySelector('.file-info');
+                if (fileInfo) fileInfo.remove();
+            }
+        }
+
+        // Update Watermark Display
+        function updateWatermarkDisplay(img, file) {
+            const box = elements.watermarkBox;
+            box.innerHTML = `
+                <img src="${img.src}" alt="Watermark preview" style="max-height: 150px; margin-bottom: 15px;">
+                <p style="color: var(--success); font-weight: 600;">✓ Watermark loaded</p>
+                <div class="file-info">
+                    <strong>${file.name}</strong><br>
+                    <small>${PerformanceManager.formatFileSize(file.size)}</small>
+                </div>
+            `;
+            box.classList.add('has-image');
+        }
+
+        // Remove Image
+        function removeImage(index) {
+            const removedImage = appState.mainImages[index];
+            appState.mainImages.splice(index, 1);
+            updateMainGallery();
+            updateProcessButtons();
+            updatePreview();
+            
+            ErrorHandler.show(
+                `${removedImage.name} removed`,
+                'info',
+                3000
+            );
+        }
+
+        // Update Process Buttons
+        function updateProcessButtons() {
+            const hasImages = appState.mainImages.length > 0;
+            const hasWatermark = appState.watermark !== null || appState.settings.textContent.trim() !== '';
+            const canProcess = hasImages && hasWatermark && !appState.processing;
+            
+            elements.processBtn.disabled = !canProcess;
+            elements.previewBtn.disabled = !canProcess;
+            
+            if (hasImages) {
+                elements.stats.style.display = 'flex';
+                document.getElementById('totalImages').textContent = appState.mainImages.length;
+                
+                const totalSize = appState.mainImages.reduce((sum, item) => sum + item.size, 0);
+                document.getElementById('totalSize').textContent =
+                    (totalSize / (1024 * 1024)).toFixed(1);
+            } else {
+                elements.stats.style.display = 'none';
+            }
+        }
+
+        // Settings Management
+        function setupSettings() {
+            const sliders = [
+                { id: 'countSlider', value: 'countValue', setting: 'count' },
+                { id: 'opacitySlider', value: 'opacityValue', setting: 'opacity' },
+                { id: 'sizeSlider', value: 'sizeValue', setting: 'size' },
+                { id: 'rotationSlider', value: 'rotationValue', setting: 'rotation' },
+                { id: 'paddingSlider', value: 'paddingValue', setting: 'padding' },
+                { id: 'textSizeSlider', value: 'textSizeValue', setting: 'textSize' },
+                { id: 'textStrokeSlider', value: 'textStrokeValue', setting: 'textStroke' },
+                { id: 'shadowBlurSlider', value: 'shadowBlurValue', setting: 'shadowBlur' },
+                { id: 'shadowOffsetSlider', value: 'shadowOffsetValue', setting: 'shadowOffset' },
+                { id: 'brightnessSlider', value: 'brightnessValue', setting: 'brightness' },
+                { id: 'contrastSlider', value: 'contrastValue', setting: 'contrast' },
+                { id: 'saturationSlider', value: 'saturationValue', setting: 'saturation' }
+            ];
+
+            sliders.forEach(({ id, value, setting }) => {
+                const slider = document.getElementById(id);
+                const valueSpan = document.getElementById(value);
+                
+                if (slider && valueSpan) {
+                    slider.addEventListener('input', (e) => {
+                        const val = parseInt(e.target.value);
+                        appState.settings[setting] = val;
+                        const suffix = setting === 'rotation' ? '°' :
+                                      (setting === 'opacity' || setting.includes('brightness') || setting.includes('contrast') || setting.includes('saturation')) ? '%' :
+                                      setting.includes('Size') ? 'px' :
+                                      setting.includes('padding') || setting.includes('Blur') || setting.includes('Offset') || setting.includes('Stroke') ? 'px' : '';
+                        valueSpan.textContent = val + suffix;
+                        updatePreview();
+                        appState.saveState();
+                    });
+                }
+            });
+
+            // Text inputs
+            const textContent = document.getElementById('textContent');
+            if (textContent) {
+                textContent.addEventListener('input', (e) => {
+                    appState.settings.textContent = e.target.value;
+                    updatePreview();
+                    updateProcessButtons();
+                });
+            }
+
+            // Select inputs
+            const selects = ['blendMode', 'fontFamily'];
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.addEventListener('change', (e) => {
+                        appState.settings[selectId] = e.target.value;
+                        updatePreview();
+                        appState.saveState();
+                    });
+                }
+            });
+
+            // Color inputs
+            const colors = [
+                { id: 'textColor', value: 'textColorValue', setting: 'textColor' },
+                { id: 'textStrokeColor', value: 'textStrokeColorValue', setting: 'textStrokeColor' },
+                { id: 'shadowColor', value: 'shadowColorValue', setting: 'shadowColor' }
+            ];
+
+            colors.forEach(({ id, value, setting }) => {
+                const colorInput = document.getElementById(id);
+                const valueSpan = document.getElementById(value);
+                
+                if (colorInput && valueSpan) {
+                    colorInput.addEventListener('input', (e) => {
+                        appState.settings[setting] = e.target.value;
+                        valueSpan.textContent = e.target.value;
+                        updatePreview();
+                        appState.saveState();
+                    });
+                }
+            });
+        }
+
+        // Mode Management
+        function setMode(mode) {
+            appState.settings.mode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            event.target.classList.add('active');
+            event.target.setAttribute('aria-pressed', 'true');
+            
+            elements.positionGrid.style.display = mode === 'position' ? 'grid' : 'none';
+            updatePreview();
+            appState.saveState();
+        }
+
+        function setPosition(position) {
+            appState.settings.position = position;
+            document.querySelectorAll('.position-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            event.target.classList.add('active');
+            event.target.setAttribute('aria-pressed', 'true');
+            updatePreview();
+            appState.saveState();
+        }
+
+        // Preview System
+        function updatePreview() {
+            if (appState.mainImages.length === 0) {
+                elements.previewSection.style.display = 'none';
+                return;
+            }
+
+            const firstImage = appState.mainImages[0];
+            if (!firstImage) return;
+
+            elements.previewSection.style.display = 'block';
+            
+            const canvas = elements.previewCanvas;
+            const ctx = canvas.getContext('2d');
+            
+            // Optimize canvas size for preview
+            const optimized = PerformanceManager.optimizeCanvas(firstImage.img);
+            canvas.width = optimized.width;
+            canvas.height = optimized.height;
+            
+            // Clear and draw image
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(firstImage.img, 0, 0, canvas.width, canvas.height);
+            
+            // Simply draw watermarks on top of the image
+            drawWatermarks(ctx, canvas.width, canvas.height);
+            
+            // Update preview info
+            elements.previewInfo.innerHTML = `
+                <strong>Preview:</strong> ${firstImage.name}<br>
+                <strong>Size:</strong> ${canvas.width}×${canvas.height}px<br>
+                <strong>Mode:</strong> ${appState.settings.mode}<br>
+                <strong>Watermark count:</strong> ${appState.settings.mode === 'position' ? 1 : appState.settings.count}
+            `;
+        }
+
+        function previewSingle() {
+            if (appState.mainImages.length > 0) {
+                updatePreview();
+                elements.previewSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Watermark Drawing
+        function drawWatermarks(ctx, canvasWidth, canvasHeight) {
+            const hasImageWatermark = appState.watermark !== null;
+            const hasTextWatermark = appState.settings.textContent.trim() !== '';
+            
+            if (!hasImageWatermark && !hasTextWatermark) return;
+
+            ctx.save();
+            ctx.globalAlpha = appState.settings.opacity / 100;
+            ctx.globalCompositeOperation = appState.settings.blendMode;
+
+            if (appState.settings.mode === 'position') {
+                const pos = getWatermarkPosition(canvasWidth, canvasHeight);
+                drawSingleWatermark(ctx, pos.x, pos.y, canvasWidth, canvasHeight);
+            } else if (appState.settings.mode === 'random') {
+                for (let i = 0; i < appState.settings.count; i++) {
+                    const x = Math.random() * canvasWidth * 0.8;
+                    const y = Math.random() * canvasHeight * 0.8;
+                    drawSingleWatermark(ctx, x, y, canvasWidth, canvasHeight);
+                }
+            } else if (appState.settings.mode === 'grid') {
+                drawGridWatermarks(ctx, canvasWidth, canvasHeight);
+            } else if (appState.settings.mode === 'pattern') {
+                drawPatternWatermarks(ctx, canvasWidth, canvasHeight);
+            }
+
+            ctx.restore();
+        }
+
+        function drawSingleWatermark(ctx, x, y, canvasWidth, canvasHeight) {
+            ctx.save();
+            
+            // Apply shadow
+            if (appState.settings.shadowBlur > 0) {
+                ctx.shadowColor = appState.settings.shadowColor;
+                ctx.shadowBlur = appState.settings.shadowBlur;
+                ctx.shadowOffsetX = appState.settings.shadowOffset;
+                ctx.shadowOffsetY = appState.settings.shadowOffset;
+            }
+
+            const rotation = (appState.settings.rotation * Math.PI) / 180;
+            
+            // Draw image watermark
+            if (appState.watermark) {
+                const size = Math.min(canvasWidth, canvasHeight) * (appState.settings.size / 100);
+                const wmWidth = size;
+                const wmHeight = (appState.watermark.height / appState.watermark.width) * size;
+                
+                ctx.translate(x + wmWidth / 2, y + wmHeight / 2);
+                ctx.rotate(rotation);
+                ctx.drawImage(appState.watermark, -wmWidth / 2, -wmHeight / 2, wmWidth, wmHeight);
+                ctx.rotate(-rotation);
+                ctx.translate(-(x + wmWidth / 2), -(y + wmHeight / 2));
+            }
+            
+            // Draw text watermark
+            if (appState.settings.textContent.trim()) {
+                const fontSize = appState.settings.textSize;
+                ctx.font = `${fontSize}px ${appState.settings.fontFamily}`;
+                ctx.fillStyle = appState.settings.textColor;
+                ctx.strokeStyle = appState.settings.textStrokeColor;
+                ctx.lineWidth = appState.settings.textStroke;
+                
+                const textX = x + (appState.watermark ? 0 : 50);
+                const textY = y + (appState.watermark ? 0 : fontSize);
+                
+                ctx.translate(textX, textY);
+                ctx.rotate(rotation);
+                
+                if (appState.settings.textStroke > 0) {
+                    ctx.strokeText(appState.settings.textContent, 0, 0);
+                }
+                ctx.fillText(appState.settings.textContent, 0, 0);
+                
+                ctx.rotate(-rotation);
+                ctx.translate(-textX, -textY);
+            }
+            
+            ctx.restore();
+        }
+
+        function drawGridWatermarks(ctx, canvasWidth, canvasHeight) {
+            const cols = Math.ceil(Math.sqrt(appState.settings.count));
+            const rows = Math.ceil(appState.settings.count / cols);
+            const spacingX = canvasWidth / (cols + 1);
+            const spacingY = canvasHeight / (rows + 1);
+
+            let count = 0;
+            for (let row = 0; row < rows && count < appState.settings.count; row++) {
+                for (let col = 0; col < cols && count < appState.settings.count; col++) {
+                    const x = spacingX * (col + 1);
+                    const y = spacingY * (row + 1);
+                    drawSingleWatermark(ctx, x, y, canvasWidth, canvasHeight);
+                    count++;
+                }
+            }
+        }
+
+        function drawPatternWatermarks(ctx, canvasWidth, canvasHeight) {
+            const spacing = Math.min(canvasWidth, canvasHeight) / 4;
+            for (let x = spacing; x < canvasWidth; x += spacing) {
+                for (let y = spacing; y < canvasHeight; y += spacing) {
+                    drawSingleWatermark(ctx, x - spacing/2, y - spacing/2, canvasWidth, canvasHeight);
+                }
+            }
+        }
+
+        function getWatermarkPosition(canvasWidth, canvasHeight) {
+            const padding = appState.settings.padding;
+            const size = Math.min(canvasWidth, canvasHeight) * (appState.settings.size / 100);
+            
+            const positions = {
+                'top-left': { x: padding, y: padding },
+                'top-center': { x: (canvasWidth - size) / 2, y: padding },
+                'top-right': { x: canvasWidth - size - padding, y: padding },
+                'left-center': { x: padding, y: (canvasHeight - size) / 2 },
+                'center': { x: (canvasWidth - size) / 2, y: (canvasHeight - size) / 2 },
+                'right-center': { x: canvasWidth - size - padding, y: (canvasHeight - size) / 2 },
+                'bottom-left': { x: padding, y: canvasHeight - size - padding },
+                'bottom-center': { x: (canvasWidth - size) / 2, y: canvasHeight - size - padding },
+                'bottom-right': { x: canvasWidth - size - padding, y: canvasHeight - size - padding }
+            };
+            
+            return positions[appState.settings.position] || positions['top-left'];
+        }
+
+        // Main Processing
+        async function processAllImages() {
+            if (appState.processing) return;
+            
+            appState.processing = true;
+            appState.processedResults = [];
+            elements.resultsGrid.innerHTML = '';
+            
+            const progressBar = elements.progressBar;
+            const progressFill = elements.progressFill;
+            const processedCounter = document.getElementById('processedImages');
+            const timeCounter = document.getElementById('processingTime');
+            
+            progressBar.style.display = 'block';
+            elements.processBtn.disabled = true;
+            
+            const startTime = performance.now();
+            
+            try {
+                for (let i = 0; i < appState.mainImages.length; i++) {
+                    const imageStartTime = performance.now();
+                    const result = await processImage(appState.mainImages[i]);
+                    appState.processedResults.push(result);
+                    
+                    // Update progress
+                    const progress = Math.round(((i + 1) / appState.mainImages.length) * 100);
+                    progressFill.style.width = progress + '%';
+                    progressFill.textContent = progress + '%';
+                    processedCounter.textContent = i + 1;
+                    
+                    const totalTime = PerformanceManager.measureTime(startTime);
+                    timeCounter.textContent = totalTime;
+                    
+                    // Add result to grid
+                    addResultToGrid(result, i);
+                    
+                    // Small delay for UI updates
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+                
+                ErrorHandler.show(
+                    `${appState.mainImages.length} images processed successfully!`,
+                    'success'
+                );
+                
+            } catch (error) {
+                ErrorHandler.show(`Processing error: ${error.message}`);
+            } finally {
+                progressBar.style.display = 'none';
+                elements.processBtn.disabled = false;
+                elements.resultsSection.style.display = 'block';
+                appState.processing = false;
+            }
+        }
+
+        async function processImage(imageData) {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = imageData.img.width;
+                canvas.height = imageData.img.height;
+                
+                // Draw original image
+                ctx.drawImage(imageData.img, 0, 0);
+                
+                // Simply draw watermarks on top of the original image
+                drawWatermarks(ctx, canvas.width, canvas.height);
+                
+                // Generate result
+                const result = {
+                    dataURL: canvas.toDataURL('image/png'),
+                    originalName: imageData.name,
+                    name: imageData.name,
+                    canvas: canvas,
+                    size: imageData.size,
+                    timestamp: Date.now()
+                };
+                
+                // Cleanup
+                PerformanceManager.cleanup(canvas);
+                
+                resolve(result);
+            });
+        }
+
+        function addResultToGrid(result, index) {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            
+            // Performance badge
+            let perfBadge = '';
+            if (result.performanceMetrics) {
+                const { perfLevel } = result.performanceMetrics;
+                perfBadge = `<span class="perf-badge ${perfLevel.level}" style="background: ${perfLevel.color}">${perfLevel.badge}</span>`;
+            }
+            
+            resultItem.innerHTML = `
+                <img src="${result.dataURL}" alt="${result.name}" loading="lazy">
+                <div class="file-name">
+                    ${result.name}
+                    ${perfBadge}
+                </div>
+                <div class="file-size">
+                    Size: ~${PerformanceManager.formatFileSize(result.dataURL.length * 0.75)}
+                    ${result.performanceMetrics ? `• ${result.performanceMetrics.processingTime}s` : ''}
+                </div>
+                <div class="download-btns">
+                    <button class="download-btn png" onclick="downloadSingle(${index}, 'png')">PNG</button>
+                    <button class="download-btn jpg" onclick="downloadSingle(${index}, 'jpg')">JPG</button>
+                    <button class="download-btn webp" onclick="downloadSingle(${index}, 'webp')">WEBP</button>
+                </div>
+            `;
+            elements.resultsGrid.appendChild(resultItem);
+        }
+
+        // Download Functions
+        function downloadSingle(index, format) {
+            const result = appState.processedResults[index];
+            const link = document.createElement('a');
+            const fileName = result.originalName.replace(/\.[^/.]+$/, '');
+            
+            let dataURL;
+            if (format === 'png') {
+                dataURL = result.dataURL;
+            } else {
+                // For JPG and WEBP, recreate the canvas from the PNG dataURL
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    tempCanvas.width = tempImg.width;
+                    tempCanvas.height = tempImg.height;
+                    
+                    if (format === 'jpg') {
+                        // Fill with white background for JPG
+                        tempCtx.fillStyle = '#FFFFFF';
+                        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    }
+                    
+                    // Draw the image
+                    tempCtx.drawImage(tempImg, 0, 0);
+                    
+                    // Generate the appropriate format
+                    if (format === 'jpg') {
+                        dataURL = tempCanvas.toDataURL('image/jpeg', 0.95);
+                    } else if (format === 'webp') {
+                        dataURL = tempCanvas.toDataURL('image/webp', 0.95);
+                    }
+                    
+                    // Download the file
+                    link.download = `${fileName}.${format}`;
+                    link.href = dataURL;
+                    link.click();
+                    
+                    PerformanceManager.cleanup(tempCanvas);
+                    ErrorHandler.show(`${result.name} downloaded`, 'success', 2000);
+                };
+                
+                tempImg.src = result.dataURL;
+                return; // Exit early for async processing
+            }
+            
+            link.download = `${fileName}.${format}`;
+            link.href = dataURL;
+            link.click();
+            
+            ErrorHandler.show(`${result.name} downloaded`, 'success', 2000);
+        }
+
+        async function downloadAllImages() {
+            if (!window.JSZip) {
+                ErrorHandler.show('ZIP functionality could not be loaded');
+                return;
+            }
+            
+            const zip = new JSZip();
+            const folder = zip.folder('watermarked_images');
+            
+            appState.processedResults.forEach((result) => {
+                const base64Data = result.dataURL.split(',')[1];
+                folder.file(result.name, base64Data, { base64: true });
+            });
+            
+            try {
+                const content = await zip.generateAsync({ type: 'blob' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = `watermarked_images_${new Date().getTime()}.zip`;
+                link.click();
+                
+                ErrorHandler.show('ZIP file downloaded', 'success');
+            } catch (error) {
+                ErrorHandler.show('Could not create ZIP: ' + error.message);
+            }
+        }
+
+        function clearResults() {
+            appState.processedResults = [];
+            elements.resultsGrid.innerHTML = '';
+            elements.resultsSection.style.display = 'none';
+            
+            ErrorHandler.show('Results cleared', 'info');
+        }
+
+        function shareResults() {
+            if (navigator.share && appState.processedResults.length > 0) {
+                navigator.share({
+                    title: 'Watermark Application Results',
+                    text: `${appState.processedResults.length} images processed with watermark`,
+                    url: window.location.href
+                }).then(() => {
+                    ErrorHandler.show('Shared', 'success');
+                }).catch(() => {
+                    copyToClipboard();
+                });
+            } else {
+                copyToClipboard();
+            }
+        }
+
+        function copyToClipboard() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                ErrorHandler.show('Link copied to clipboard', 'success');
+            });
+        }
+
+        // Preset Management
+        function savePreset() {
+            const presetName = prompt('Preset name:', 'New Preset');
+            if (presetName) {
+                const presets = JSON.parse(localStorage.getItem('watermark_presets') || '{}');
+                presets[presetName] = { ...appState.settings };
+                localStorage.setItem('watermark_presets', JSON.stringify(presets));
+                
+                ErrorHandler.show(`"${presetName}" preset saved`, 'success');
+            }
+        }
+
+        function loadPreset() {
+            const presets = JSON.parse(localStorage.getItem('watermark_presets') || '{}');
+            const presetNames = Object.keys(presets);
+            
+            if (presetNames.length === 0) {
+                ErrorHandler.show('No saved presets found');
+                return;
+            }
+            
+            const presetName = prompt('Preset to load:\n' + presetNames.join('\n'));
+            if (presetName && presets[presetName]) {
+                appState.settings = { ...presets[presetName] };
+                updateAllSliders();
+                updatePreview();
+                
+                ErrorHandler.show(`"${presetName}" preset loaded`, 'success');
+            }
+        }
+
+        function resetSettings() {
+            appState.settings = {
+                count: 5,
+                opacity: 50,
+                size: 15,
+                rotation: 0,
+                mode: 'position',
+                position: 'top-left',
+                blendMode: 'normal',
+                padding: 20,
+                textContent: '',
+                textSize: 24,
+                fontFamily: 'Arial',
+                textColor: '#ffffff',
+                textStroke: 2,
+                textStrokeColor: '#000000',
+                shadowBlur: 0,
+                shadowOffset: 0,
+                shadowColor: '#000000',
+                brightness: 100,
+                contrast: 100,
+                saturation: 100
+            };
+            
+            updateAllSliders();
+            updatePreview();
+            
+            ErrorHandler.show('Settings reset', 'info');
+        }
+
+        function updateAllSliders() {
+            document.getElementById('countSlider').value = appState.settings.count;
+            document.getElementById('countValue').textContent = appState.settings.count;
+            
+            document.getElementById('opacitySlider').value = appState.settings.opacity;
+            document.getElementById('opacityValue').textContent = appState.settings.opacity;
+            
+            document.getElementById('sizeSlider').value = appState.settings.size;
+            document.getElementById('sizeValue').textContent = appState.settings.size;
+            
+            document.getElementById('rotationSlider').value = appState.settings.rotation;
+            document.getElementById('rotationValue').textContent = appState.settings.rotation;
+            
+            document.getElementById('paddingSlider').value = appState.settings.padding;
+            document.getElementById('paddingValue').textContent = appState.settings.padding;
+            
+            // Text settings
+            document.getElementById('textContent').value = appState.settings.textContent;
+            document.getElementById('textSizeSlider').value = appState.settings.textSize;
+            document.getElementById('textSizeValue').textContent = appState.settings.textSize;
+            document.getElementById('fontFamily').value = appState.settings.fontFamily;
+            document.getElementById('textColor').value = appState.settings.textColor;
+            document.getElementById('textColorValue').textContent = appState.settings.textColor;
+            document.getElementById('textStrokeSlider').value = appState.settings.textStroke;
+            document.getElementById('textStrokeValue').textContent = appState.settings.textStroke;
+            document.getElementById('textStrokeColor').value = appState.settings.textStrokeColor;
+            document.getElementById('textStrokeColorValue').textContent = appState.settings.textStrokeColor;
+            
+            // Effects
+            document.getElementById('shadowBlurSlider').value = appState.settings.shadowBlur;
+            document.getElementById('shadowBlurValue').textContent = appState.settings.shadowBlur;
+            document.getElementById('shadowOffsetSlider').value = appState.settings.shadowOffset;
+            document.getElementById('shadowOffsetValue').textContent = appState.settings.shadowOffset;
+            document.getElementById('shadowColor').value = appState.settings.shadowColor;
+            document.getElementById('shadowColorValue').textContent = appState.settings.shadowColor;
+            document.getElementById('brightnessSlider').value = appState.settings.brightness;
+            document.getElementById('brightnessValue').textContent = appState.settings.brightness;
+            document.getElementById('contrastSlider').value = appState.settings.contrast;
+            document.getElementById('contrastValue').textContent = appState.settings.contrast;
+            document.getElementById('saturationSlider').value = appState.settings.saturation;
+            document.getElementById('saturationValue').textContent = appState.settings.saturation;
+            
+            document.getElementById('blendMode').value = appState.settings.blendMode;
+        }
+
+        // Clear all images function
+        function clearAllImages(event) {
+            // Prevent the upload box click event
+            if (event) {
+                event.stopPropagation();
+                event.preventDefault();
+            }
+            appState.mainImages = [];
+            appState.watermark = null;
+            
+            // Reset upload boxes
+            const mainBox = elements.mainImageBox;
+            const watermarkBox = elements.watermarkBox;
+            
+            // Reset main image box
+            mainBox.classList.remove('has-image');
+            mainBox.innerHTML = `
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                        <circle cx="12" cy="13" r="4"/>
+                    </svg>
+                </div>
+                <h3>Upload Main Images</h3>
+                <p>Click or drag images here (PNG, JPG, WEBP)</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 10MB</p>
+                <input type="file" id="mainImageInput" accept="image/*" multiple aria-label="Select main image files">
+                <div class="image-gallery" id="mainGallery" role="list"></div>
+                <button class="clear-images-btn" onclick="clearAllImages(event)" style="display: none; margin-top: 15px; padding: 8px 16px; background: var(--error); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 10; position: relative;" id="clearImagesBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
+                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/>
+                    </svg>
+                    Clear All
+                </button>
+            `;
+            
+            // Reset watermark box
+            watermarkBox.classList.remove('has-image');
+            watermarkBox.innerHTML = `
+                <div class="upload-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                    </svg>
+                </div>
+                <h3>Upload Watermark/Logo</h3>
+                <p>We recommend transparent PNG logos</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 5MB</p>
+                <input type="file" id="watermarkInput" accept="image/*" aria-label="Select watermark file">
+            `;
+            
+            // Re-setup event listeners
+            setupFileInputs();
+            setupClickHandlers();
+            
+            updateMainGallery();
+            updateProcessButtons();
+            updatePreview();
+            
+            ErrorHandler.show('All images cleared', 'info', 2000);
+        }
+
+        // Preset System - Apply Preset
+        function applyPreset(presetType) {
+            const presets = {
+                subtle: {
+                    count: 3,
+                    opacity: 25,
+                    size: 8,
+                    rotation: -15,
+                    mode: 'random',
+                    position: 'bottom-right',
+                    blendMode: 'multiply',
+                    padding: 30
+                },
+                standard: {
+                    count: 5,
+                    opacity: 50,
+                    size: 15,
+                    rotation: 0,
+                    mode: 'position',
+                    position: 'bottom-right',
+                    blendMode: 'normal',
+                    padding: 20
+                },
+                bold: {
+                    count: 1,
+                    opacity: 80,
+                    size: 25,
+                    rotation: 0,
+                    mode: 'position',
+                    position: 'center',
+                    blendMode: 'normal',
+                    padding: 10
+                },
+                corner: {
+                    count: 1,
+                    opacity: 60,
+                    size: 12,
+                    rotation: 0,
+                    mode: 'position',
+                    position: 'bottom-right',
+                    blendMode: 'normal',
+                    padding: 15
+                }
+            };
+
+            if (presets[presetType]) {
+                // Update settings
+                Object.assign(appState.settings, presets[presetType]);
+                
+                // Update UI
+                updateAllSliders();
+                updateModeButtons();
+                updatePositionButtons();
+                updatePreview();
+                
+                // Visual feedback
+                document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelector(`[data-preset="${presetType}"]`).classList.add('active');
+                
+                ErrorHandler.show(`"${presetType.toUpperCase()}" preset applied`, 'success', 2000);
+                appState.saveState();
+            }
+        }
+
+        // Favorites System
+        function saveToFavorites() {
+            const favoriteName = prompt('Favorite setting name:', 'Favorite ' + (Date.now().toString().slice(-4)));
+            if (favoriteName) {
+                const favorites = JSON.parse(localStorage.getItem('watermark_favorites') || '{}');
+                favorites[favoriteName] = {
+                    settings: { ...appState.settings },
+                    timestamp: Date.now(),
+                    preview: generatePreviewThumbnail()
+                };
+                localStorage.setItem('watermark_favorites', JSON.stringify(favorites));
+                
+                ErrorHandler.show(`"${favoriteName}" added to favorites ⭐`, 'success');
+                updateFavoritesList();
+            }
+        }
+
+        // Generate preview thumbnail for favorites
+        function generatePreviewThumbnail() {
+            if (appState.mainImages.length === 0) return null;
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 100;
+            canvas.height = 75;
+            
+            // Draw mini preview
+            ctx.drawImage(appState.mainImages[0].img, 0, 0, 100, 75);
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = '#666';
+            ctx.fillRect(80, 60, 15, 10);
+            
+            return canvas.toDataURL('image/jpeg', 0.5);
+        }
+
+        // Update favorites list in UI
+        function updateFavoritesList() {
+            const favorites = JSON.parse(localStorage.getItem('watermark_favorites') || '{}');
+            // Implementation for favorites dropdown/list can be added here
+            // Silent update - favorites count: Object.keys(favorites).length
+        }
+
+        // Mode and Position Button Updates
+        function updateModeButtons() {
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick*="'${appState.settings.mode}'"]`).classList.add('active');
+        }
+
+        function updatePositionButtons() {
+            document.querySelectorAll('.position-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[onclick*="'${appState.settings.position}'"]`).classList.add('active');
+        }
+
+        // Advanced Export System
+        function setupExportTab() {
+            // JPG Quality Slider
+            const jpgSlider = document.getElementById('jpgQualitySlider');
+            const jpgValue = document.getElementById('jpgQualityValue');
+            jpgSlider.addEventListener('input', (e) => {
+                jpgValue.textContent = e.target.value;
+            });
+
+            // WEBP Quality Slider
+            const webpSlider = document.getElementById('webpQualitySlider');
+            const webpValue = document.getElementById('webpQualityValue');
+            webpSlider.addEventListener('input', (e) => {
+                webpValue.textContent = e.target.value;
+            });
+
+            // Performance Mode
+            const perfMode = document.getElementById('performanceMode');
+            perfMode.addEventListener('change', (e) => {
+                const mode = e.target.value;
+                applyPerformanceMode(mode);
+            });
+        }
+
+        // Apply Performance Mode
+        function applyPerformanceMode(mode) {
+            switch (mode) {
+                case 'quality':
+                    document.getElementById('jpgQualitySlider').value = 100;
+                    document.getElementById('webpQualitySlider').value = 95;
+                    break;
+                case 'balanced':
+                    document.getElementById('jpgQualitySlider').value = 90;
+                    document.getElementById('webpQualitySlider').value = 85;
+                    break;
+                case 'speed':
+                    document.getElementById('jpgQualitySlider').value = 75;
+                    document.getElementById('webpQualitySlider').value = 70;
+                    break;
+            }
+            
+            // Update display values
+            document.getElementById('jpgQualityValue').textContent = document.getElementById('jpgQualitySlider').value;
+            document.getElementById('webpQualityValue').textContent = document.getElementById('webpQualitySlider').value;
+            
+            ErrorHandler.show(`Performance mode: ${mode}`, 'info', 2000);
+        }
+
+        // Multi-format download with progress
+        async function downloadAllFormats() {
+            const exportOptions = {
+                png: document.getElementById('exportPNG').checked,
+                jpg: document.getElementById('exportJPG').checked,
+                webp: document.getElementById('exportWEBP').checked,
+                jpgQuality: parseInt(document.getElementById('jpgQualitySlider').value) / 100,
+                webpQuality: parseInt(document.getElementById('webpQualitySlider').value) / 100
+            };
+
+            if (!exportOptions.png && !exportOptions.jpg && !exportOptions.webp) {
+                ErrorHandler.show('You must select at least one format', 'warning');
+                return;
+            }
+
+            const zip = new JSZip();
+            const progressBar = document.createElement('div');
+            progressBar.className = 'advanced-progress';
+            progressBar.innerHTML = `
+                <div class="progress-details">
+                    <span>Multi-format export...</span>
+                    <span class="speed-indicator">Preparing...</span>
+                </div>
+                <div class="progress-bar" style="display: block;">
+                    <div class="progress-fill" style="width: 0%;">0%</div>
+                </div>
+            `;
+            
+            document.querySelector('.process-section').appendChild(progressBar);
+
+            try {
+                const startTime = performance.now();
+                const totalFiles = appState.processedResults.length *
+                    (exportOptions.png + exportOptions.jpg + exportOptions.webp);
+                let processed = 0;
+
+                for (const result of appState.processedResults) {
+                    const baseName = result.originalName.replace(/\.[^/.]+$/, '');
+                    
+                    if (exportOptions.png) {
+                        zip.file(`PNG/${baseName}.png`, result.dataURL.split(',')[1], { base64: true });
+                        processed++;
+                        updateExportProgress(progressBar, processed, totalFiles, startTime);
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
+                    
+                    if (exportOptions.jpg) {
+                        const jpgData = await convertToFormat(result.dataURL, 'jpeg', exportOptions.jpgQuality);
+                        zip.file(`JPG/${baseName}.jpg`, jpgData.split(',')[1], { base64: true });
+                        processed++;
+                        updateExportProgress(progressBar, processed, totalFiles, startTime);
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
+                    
+                    if (exportOptions.webp) {
+                        const webpData = await convertToFormat(result.dataURL, 'webp', exportOptions.webpQuality);
+                        zip.file(`WEBP/${baseName}.webp`, webpData.split(',')[1], { base64: true });
+                        processed++;
+                        updateExportProgress(progressBar, processed, totalFiles, startTime);
+                        await new Promise(resolve => setTimeout(resolve, 10));
+                    }
+                }
+
+                const content = await zip.generateAsync({ type: 'blob' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(content);
+                link.download = `watermarked_multiformat_${Date.now()}.zip`;
+                link.click();
+
+                ErrorHandler.show(`${totalFiles} files exported successfully! 🎉`, 'success');
+            } catch (error) {
+                ErrorHandler.show('Export error: ' + error.message, 'error');
+            } finally {
+                progressBar.remove();
+            }
+        }
+
+        // Update export progress
+        function updateExportProgress(progressBar, processed, total, startTime) {
+            const percentage = Math.round((processed / total) * 100);
+            const elapsed = (performance.now() - startTime) / 1000;
+            const speed = processed / elapsed;
+            const remaining = (total - processed) / speed;
+            
+            const progressFill = progressBar.querySelector('.progress-fill');
+            const speedIndicator = progressBar.querySelector('.speed-indicator');
+            
+            progressFill.style.width = percentage + '%';
+            progressFill.textContent = percentage + '%';
+            speedIndicator.textContent = `${speed.toFixed(1)} file/s - ${remaining.toFixed(0)}s remaining`;
+        }
+
+        // Convert format helper
+        async function convertToFormat(dataURL, format, quality) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    if (format === 'jpeg') {
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    
+                    ctx.drawImage(img, 0, 0);
+                    
+                    const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/webp';
+                    resolve(canvas.toDataURL(mimeType, quality));
+                };
+                img.src = dataURL;
+            });
+        }
+
+        // Undo System
+        function undoLast() {
+            appState.undoState();
+        }
+
+        // Help System
+        function showHelp() {
+            const helpContent = `
+            <div style="max-width: 600px; line-height: 1.6;">
+                <h2>🎨 Watermark Application Help</h2>
+                <h3>📋 How to Use:</h3>
+                <ol>
+                    <li><strong>Upload Images:</strong> Click the main image box or drag and drop</li>
+                    <li><strong>Add Watermark:</strong> Upload or write your logo/text watermark</li>
+                    <li><strong>Adjust Settings:</strong> Configure size, opacity, position and other settings</li>
+                    <li><strong>Preview:</strong> See the result with real-time preview</li>
+                    <li><strong>Process:</strong> Batch process all images</li>
+                    <li><strong>Download:</strong> Download individually or as ZIP</li>
+                </ol>
+                
+                <h3>⚙️ Features:</h3>
+                <ul>
+                    <li><strong>Multi-format:</strong> PNG, JPG, WEBP support</li>
+                    <li><strong>Text Watermark:</strong> Custom text, fonts and colors</li>
+                    <li><strong>Advanced Effects:</strong> Shadow, blur, color adjustments</li>
+                    <li><strong>Preset System:</strong> Save/load settings</li>
+                    <li><strong>Batch Processing:</strong> Hundreds of images at once</li>
+                </ul>
+
+                <h3>⌨️ Keyboard Shortcuts:</h3>
+                <ul>
+                    <li><kbd>Ctrl+O</kbd> - Select file</li>
+                    <li><kbd>Ctrl+Enter</kbd> - Process</li>
+                    <li><kbd>Ctrl+Z</kbd> - Undo</li>
+                    <li><kbd>Ctrl+T</kbd> - Toggle theme</li>
+                    <li><kbd>F1</kbd> - This help</li>
+                </ul>
+            </div>
+            `;
+            
+            const helpModal = document.createElement('div');
+            helpModal.className = 'loading-overlay';
+            helpModal.innerHTML = `
+                <div class="loading-content" style="max-height: 80vh; overflow-y: auto;">
+                    ${helpContent}
+                    <button onclick="this.closest('.loading-overlay').remove()"
+                            style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 8px; background: var(--primary); color: white; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(helpModal);
+        }
+
+        // Keyboard Shortcuts
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                if (e.ctrlKey) {
+                    switch (e.key) {
+                        case 'o':
+                            e.preventDefault();
+                            elements.mainImageInput.click();
+                            break;
+                        case 'Enter':
+                            e.preventDefault();
+                            if (!elements.processBtn.disabled) {
+                                processAllImages();
+                            }
+                            break;
+                        case 'z':
+                            e.preventDefault();
+                            undoLast();
+                            break;
+                        case 't':
+                            e.preventDefault();
+                            toggleTheme();
+                            break;
+                    }
+                } else if (e.key === 'F1') {
+                    e.preventDefault();
+                    showHelp();
+                }
+            });
+        }
+
+        // Smart Suggestions System
+        class SmartSuggestions {
+            static analyzeImage(img) {
+                const aspectRatio = img.width / img.height;
+                const megapixels = (img.width * img.height) / (1024 * 1024);
+                const isLandscape = aspectRatio > 1.2;
+                const isPortrait = aspectRatio < 0.8;
+                
+                return { aspectRatio, megapixels, isLandscape, isPortrait };
+            }
+            
+            static suggestOptimalSettings(imageAnalysis) {
+                const suggestions = {};
+                
+                // Size suggestions based on image size
+                if (imageAnalysis.megapixels > 5) {
+                    suggestions.size = { value: 12, reason: 'Small watermark recommended for high resolution' };
+                } else if (imageAnalysis.megapixels < 1) {
+                    suggestions.size = { value: 20, reason: 'Large watermark recommended for low resolution' };
+                } else {
+                    suggestions.size = { value: 15, reason: 'Standard size for medium resolution' };
+                }
+                
+                // Position suggestions
+                if (imageAnalysis.isLandscape) {
+                    suggestions.position = { value: 'bottom-right', reason: 'Bottom right corner recommended for landscape images' };
+                } else if (imageAnalysis.isPortrait) {
+                    suggestions.position = { value: 'bottom-center', reason: 'Bottom center recommended for portrait images' };
+                } else {
+                    suggestions.position = { value: 'bottom-right', reason: 'Bottom right corner recommended for square images' };
+                }
+                
+                // Opacity suggestions
+                suggestions.opacity = { value: 40, reason: 'Medium transparency for professional look' };
+                
+                return suggestions;
+            }
+            
+            static showSuggestions(suggestions) {
+                const suggestionHtml = Object.keys(suggestions).map(key => {
+                    const suggestion = suggestions[key];
+                    return `
+                        <div class="suggestion-item">
+                            <strong>${key.toUpperCase()}:</strong> ${suggestion.value}
+                            <br><small>${suggestion.reason}</small>
+                            <button class="apply-suggestion-btn" onclick="applySuggestion('${key}', '${suggestion.value}')">
+                                Apply
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+                
+                const modal = document.createElement('div');
+                modal.className = 'loading-overlay';
+                modal.innerHTML = `
+                    <div class="loading-content">
+                        <h3>🤖 Smart Suggestions</h3>
+                        <p>Optimized settings for your image:</p>
+                        ${suggestionHtml}
+                        <button onclick="this.closest('.loading-overlay').remove()"
+                                style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 8px; background: var(--secondary); color: white; cursor: pointer;">
+                            Close
+                        </button>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+            }
+        }
+        
+        // Apply smart suggestion
+        function applySuggestion(settingType, value) {
+            switch (settingType) {
+                case 'size':
+                    appState.settings.size = parseInt(value);
+                    document.getElementById('sizeSlider').value = value;
+                    document.getElementById('sizeValue').textContent = value;
+                    break;
+                case 'position':
+                    appState.settings.position = value;
+                    updatePositionButtons();
+                    break;
+                case 'opacity':
+                    appState.settings.opacity = parseInt(value);
+                    document.getElementById('opacitySlider').value = value;
+                    document.getElementById('opacityValue').textContent = value;
+                    break;
+            }
+            
+            updatePreview();
+            document.querySelector('.loading-overlay').remove();
+            ErrorHandler.show('Suggestions applied!', 'success', 2000);
+        }
+        
+        // Quick Actions System
+        function showQuickActions() {
+            const modal = document.createElement('div');
+            modal.className = 'loading-overlay';
+            modal.innerHTML = `
+                <div class="loading-content">
+                    <h3>⚡ Quick Actions</h3>
+                    <div style="display: grid; gap: 15px; margin: 20px 0;">
+                        <button class="process-btn" onclick="quickLogo()">📱 Add Logo</button>
+                        <button class="process-btn" onclick="quickCopyright()">© Copyright</button>
+                        <button class="process-btn" onclick="quickWatermark()">🌊 Classic Watermark</button>
+                        <button class="process-btn secondary-btn" onclick="autoOptimize()">🤖 Auto Optimize</button>
+                    </div>
+                    <button onclick="this.closest('.loading-overlay').remove()"
+                            style="padding: 8px 16px; border: none; border-radius: 8px; background: var(--secondary); color: white; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Quick action functions
+        function quickLogo() {
+            appState.settings.mode = 'position';
+            appState.settings.position = 'bottom-right';
+            appState.settings.size = 15;
+            appState.settings.opacity = 80;
+            updateAllSliders();
+            updateModeButtons();
+            updatePositionButtons();
+            updatePreview();
+            document.querySelector('.loading-overlay').remove();
+            ErrorHandler.show('Logo settings applied', 'success');
+        }
+        
+        function quickCopyright() {
+            appState.settings.textContent = `© ${new Date().getFullYear()} All rights reserved`;
+            appState.settings.mode = 'position';
+            appState.settings.position = 'bottom-center';
+            appState.settings.textSize = 16;
+            appState.settings.opacity = 60;
+            updateAllSliders();
+            updateModeButtons();
+            updatePositionButtons();
+            updatePreview();
+            document.querySelector('.loading-overlay').remove();
+            ErrorHandler.show('Copyright text added', 'success');
+        }
+        
+        function quickWatermark() {
+            appState.settings.mode = 'pattern';
+            appState.settings.opacity = 20;
+            appState.settings.rotation = -30;
+            appState.settings.textContent = 'WATERMARK';
+            appState.settings.textSize = 48;
+            updateAllSliders();
+            updateModeButtons();
+            updatePreview();
+            document.querySelector('.loading-overlay').remove();
+            ErrorHandler.show('Classic watermark applied', 'success');
+        }
+        
+        function autoOptimize() {
+            if (appState.mainImages.length > 0) {
+                const analysis = SmartSuggestions.analyzeImage(appState.mainImages[0].img);
+                const suggestions = SmartSuggestions.suggestOptimalSettings(analysis);
+                
+                // Auto-apply suggestions
+                Object.keys(suggestions).forEach(key => {
+                    applySuggestion(key, suggestions[key].value);
+                });
+                
+                document.querySelector('.loading-overlay').remove();
+                ErrorHandler.show('Auto optimization completed!', 'success');
+            } else {
+                ErrorHandler.show('Please upload an image first', 'warning');
+            }
+        }
+        
+        // Enhanced image loading with smart suggestions
+        function enhancedLoadImage(file, type) {
+            loadImage(file, type).then(() => {
+                if (type === 'main' && appState.mainImages.length === 1) {
+                    // Show smart suggestions for first image
+                    setTimeout(() => {
+                        const analysis = SmartSuggestions.analyzeImage(appState.mainImages[0].img);
+                        const suggestions = SmartSuggestions.suggestOptimalSettings(analysis);
+                        SmartSuggestions.showSuggestions(suggestions);
+                    }, 1000);
+                }
+            });
+        }
+
+        // Initialize Application
+        function initializeApp() {
+            initializeTheme();
+            setupDragAndDrop();
+            setupClickHandlers();
+            setupFileInputs();
+            setupSettings();
+            setupKeyboardShortcuts();
+            setupExportTab();
+            
+            // Update state
+            appState.updateUndoButton();
+            updateProcessButtons();
+            updateFavoritesList();
+            
+            // Add quick actions button to header
+            const quickActionsBtn = document.createElement('button');
+            quickActionsBtn.className = 'help-btn';
+            quickActionsBtn.textContent = '⚡ Quick Actions';
+            quickActionsBtn.onclick = showQuickActions;
+            document.querySelector('.header-controls').insertBefore(
+                quickActionsBtn,
+                document.querySelector('.help-btn')
+            );
+            
+            // Show welcome message with tips
+            setTimeout(() => {
+                const welcomeMsg = `
+                    Watermark Application is ready!
+                    💡 Tip: Smart suggestions will be shown when you upload your first image.
+                    ⚡ Use the Quick Actions button to quickly access common settings.
+                    Press F1 for detailed help.
+                `;
+                ErrorHandler.show(welcomeMsg, 'info', 6000);
+            }, 1000);
+        }
+
+        // Start the application
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+</body>
+</html>
