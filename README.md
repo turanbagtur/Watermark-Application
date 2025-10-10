@@ -2,8 +2,6 @@
 
 A powerful, feature-rich watermark application built with HTML5, CSS3, and JavaScript. Add watermarks to your images with professional precision and advanced customization options.
 
-![Watermark Application Preview](https://via.placeholder.com/800x400/2563eb/ffffff?text=Advanced+Watermark+Application)
-
 ## ✨ Features
 
 ### 🖼️ Image Processing
@@ -248,14 +246,6 @@ Access common watermark styles instantly:
 - **Safari**: Works well, limited WEBP support on older versions
 - **Edge**: Full feature support, good performance
 
-## 🤝 Contributing
-
-This is a single-file HTML application that's easy to modify and extend:
-
-1. **Fork** the repository
-2. **Edit** the `watermarkadder.html` file
-3. **Test** your changes in multiple browsers
-4. **Submit** a pull request with your improvements
 
 ### Feature Requests
 - Additional image formats support
@@ -275,7 +265,3 @@ If you find this tool useful, consider:
 - 🐛 Reporting bugs or suggesting features
 - 💕 Supporting development via Ko-fi (button in the app)
 - 📢 Sharing with others who might benefit
-
----
-
-**Made with ❤️ for creators, photographers, and professionals who need reliable watermarking.**
