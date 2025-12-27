@@ -6,7 +6,7 @@
     <title>Advanced Professional Watermark Application</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
             /* Light Mode Colors */
@@ -403,6 +403,40 @@
             box-shadow: 0 2px 8px var(--shadow);
         }
 
+        .setting-item input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: var(--surface-3);
+            border-radius: 5px;
+            border: none;
+        }
+
+        .setting-item input[type="range"]::-ms-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: transparent;
+            border-color: transparent;
+            color: transparent;
+        }
+
+        .setting-item input[type="range"]::-ms-fill-lower,
+        .setting-item input[type="range"]::-ms-fill-upper {
+            background: var(--surface-3);
+            border-radius: 5px;
+        }
+
+        .setting-item input[type="range"]::-ms-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
         .setting-item input[type="text"] {
             width: 100%;
             padding: 12px 15px;
@@ -621,9 +655,10 @@
         }
 
         .progress-fill {
+            width: 0%;
             height: 100%;
             background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
-            transition: width 0.5s ease;
+            transition: width 0.3s ease;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1256,7 +1291,7 @@
                     </svg>
                     Real-time Preview
                 </h2>
-                <canvas class="preview-canvas" id="previewCanvas" aria-label="Watermark preview"></canvas>
+                <canvas class="preview-canvas" id="previewCanvas" aria-label="Watermark preview" tabindex="0"></canvas>
                 <div class="file-info" id="previewInfo"></div>
             </section>
 
@@ -1285,6 +1320,16 @@
                         </svg>
                         Text
                     </button>
+                    <button class="tab-btn" role="tab" aria-selected="false" aria-controls="qr-tab" id="qr-tab-btn" onclick="switchTab('qr')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <path d="M7 7h3v3H7z"></path>
+                            <path d="M14 7h3v3h-3z"></path>
+                            <path d="M7 14h3v3H7z"></path>
+                            <path d="M14 14h3v3h-3z"></path>
+                        </svg>
+                        QR Code
+                    </button>
                     <button class="tab-btn" role="tab" aria-selected="false" aria-controls="effects-tab" id="effects-tab-btn" onclick="switchTab('effects')">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
@@ -1305,8 +1350,8 @@
                     <div class="settings-grid">
                         <div class="setting-item">
                             <label for="countSlider">Watermark Count: <span class="setting-value" id="countValue">5</span></label>
-                            <input type="range" id="countSlider" min="1" max="50" value="5" aria-describedby="count-desc">
-                            <small id="count-desc">Used in random and grid modes</small>
+                            <input type="range" id="countSlider" min="1" max="200" value="5" aria-describedby="count-desc">
+                            <small id="count-desc">For Grid/Random modes. (In Position mode, it's always 1)</small>
                         </div>
 
                         <div class="setting-item">
@@ -1316,7 +1361,7 @@
 
                         <div class="setting-item">
                             <label for="sizeSlider">Size: <span class="setting-value" id="sizeValue">15</span>%</label>
-                            <input type="range" id="sizeSlider" min="2" max="80" value="15">
+                            <input type="range" id="sizeSlider" min="1" max="100" value="15">
                         </div>
 
                         <div class="setting-item">
@@ -1341,6 +1386,18 @@
                         <div class="setting-item">
                             <label for="paddingSlider">Padding: <span class="setting-value" id="paddingValue">20</span>px</label>
                             <input type="range" id="paddingSlider" min="0" max="100" value="20">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="qualitySlider">Output Quality: <span class="setting-value" id="qualityValue">85</span>%</label>
+                            <input type="range" id="qualitySlider" min="10" max="100" value="85">
+                        </div>
+
+                        <div class="setting-item">
+                            <label for="preserveFormat">
+                                <input type="checkbox" id="preserveFormat" checked>
+                                Preserve Original Format
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -1367,6 +1424,15 @@
                                 <option value="Verdana">Verdana</option>
                                 <option value="Courier New">Courier New</option>
                                 <option value="Impact">Impact</option>
+                                <option value="Inter">Inter</option>
+                                <option value="Roboto">Roboto</option>
+                                <option value="Open Sans">Open Sans</option>
+                                <option value="Lato">Lato</option>
+                                <option value="Montserrat">Montserrat</option>
+                                <option value="Oswald">Oswald</option>
+                                <option value="Raleway">Raleway</option>
+                                <option value="Merriweather">Merriweather</option>
+                                <option value="Playfair Display">Playfair Display</option>
                             </select>
                         </div>
 
@@ -1388,6 +1454,61 @@
                             <div class="color-picker-wrapper">
                                 <input type="color" id="textStrokeColor" class="color-picker" value="#000000">
                                 <span id="textStrokeColorValue">#000000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="qr-tab" role="tabpanel" aria-labelledby="qr-tab-btn">
+                    <div class="settings-grid">
+                        <div class="setting-item">
+                            <label for="qrContent">QR Code Content:</label>
+                            <input type="text" id="qrContent" placeholder="Enter text or URL for QR code" maxlength="500">
+                        </div>
+
+                        <div class="setting-item">
+                            <label>QR Foreground Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="qrColor" class="color-picker" value="#000000">
+                                <span id="qrColorValue">#000000</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>QR Background Color:</label>
+                            <div class="color-picker-wrapper">
+                                <input type="color" id="qrBgColor" class="color-picker" value="#ffffff">
+                                <span id="qrBgColorValue">#ffffff</span>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>QR Code Actions:</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
+                                <button class="process-btn" onclick="generateAndSetQR()" style="padding: 8px 15px; display: flex; align-items: center; gap: 6px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <path d="M7 7h3v3H7z"></path>
+                                        <path d="M14 7h3v3h-3z"></path>
+                                        <path d="M7 14h3v3H7z"></path>
+                                    </svg>
+                                    Generate QR
+                                </button>
+                                <button class="secondary-btn" onclick="restoreUploadedWatermark()" id="restoreWatermarkBtn" style="padding: 8px 15px; display: none; align-items: center; gap: 6px;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="23 4 23 10 17 10"></polyline>
+                                        <polyline points="1 20 1 14 7 14"></polyline>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Restore Original
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <label>QR Preview:</label>
+                            <div id="qrPreviewContainer" style="margin-top: 10px; min-height: 50px; display: flex; align-items: center; justify-content: center; background: var(--surface-2); border-radius: 8px; padding: 20px;">
+                                <span style="color: var(--text-muted);">QR code will appear here after generation</span>
                             </div>
                         </div>
                     </div>
@@ -1431,14 +1552,14 @@
                 </div>
 
                 <div class="mode-buttons" role="group" aria-label="Watermark distribution modes">
-                    <button class="mode-btn active" onclick="setMode('position')" aria-pressed="true">
+                    <button class="mode-btn active" onclick="setMode('position', this)" aria-pressed="true" aria-label="Specific position mode">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                             <circle cx="12" cy="10" r="3"/>
                         </svg>
                         Specific Position
                     </button>
-                    <button class="mode-btn" onclick="setMode('random')" aria-pressed="false">
+                    <button class="mode-btn" onclick="setMode('random', this)" aria-pressed="false" aria-label="Random distribution mode">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="6" height="6" rx="1"/>
                             <rect x="15" y="3" width="6" height="6" rx="1"/>
@@ -1447,7 +1568,7 @@
                         </svg>
                         Random Distribution
                     </button>
-                    <button class="mode-btn" onclick="setMode('grid')" aria-pressed="false">
+                    <button class="mode-btn" onclick="setMode('grid', this)" aria-pressed="false" aria-label="Grid distribution mode">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="7" height="7"/>
                             <rect x="14" y="3" width="7" height="7"/>
@@ -1456,7 +1577,7 @@
                         </svg>
                         Grid Distribution
                     </button>
-                    <button class="mode-btn" onclick="setMode('pattern')" aria-pressed="false">
+                    <button class="mode-btn" onclick="setMode('pattern', this)" aria-pressed="false" aria-label="Pattern distribution mode">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M23 6l-9.5 9.5-5-5L1 18"/>
                             <path d="M17 6h6v6"/>
@@ -1466,15 +1587,15 @@
                 </div>
 
                 <div class="position-grid" id="positionGrid" role="group" aria-label="Position options">
-                    <button class="position-btn active" onclick="setPosition('top-left')" aria-pressed="true">↖ Top Left</button>
-                    <button class="position-btn" onclick="setPosition('top-center')" aria-pressed="false">↑ Top Center</button>
-                    <button class="position-btn" onclick="setPosition('top-right')" aria-pressed="false">↗ Top Right</button>
-                    <button class="position-btn" onclick="setPosition('left-center')" aria-pressed="false">← Left Center</button>
-                    <button class="position-btn" onclick="setPosition('center')" aria-pressed="false">• Center</button>
-                    <button class="position-btn" onclick="setPosition('right-center')" aria-pressed="false">→ Right Center</button>
-                    <button class="position-btn" onclick="setPosition('bottom-left')" aria-pressed="false">↙ Bottom Left</button>
-                    <button class="position-btn" onclick="setPosition('bottom-center')" aria-pressed="false">↓ Bottom Center</button>
-                    <button class="position-btn" onclick="setPosition('bottom-right')" aria-pressed="false">↘ Bottom Right</button>
+                    <button class="position-btn active" onclick="setPosition('top-left', this)" aria-pressed="true" aria-label="Top left corner">↖ Top Left</button>
+                    <button class="position-btn" onclick="setPosition('top-center', this)" aria-pressed="false" aria-label="Top center">↑ Top Center</button>
+                    <button class="position-btn" onclick="setPosition('top-right', this)" aria-pressed="false" aria-label="Top right corner">↗ Top Right</button>
+                    <button class="position-btn" onclick="setPosition('left-center', this)" aria-pressed="false" aria-label="Left center">← Left Center</button>
+                    <button class="position-btn" onclick="setPosition('center', this)" aria-pressed="false" aria-label="Center">• Center</button>
+                    <button class="position-btn" onclick="setPosition('right-center', this)" aria-pressed="false" aria-label="Right center">→ Right Center</button>
+                    <button class="position-btn" onclick="setPosition('bottom-left', this)" aria-pressed="false" aria-label="Bottom left corner">↙ Bottom Left</button>
+                    <button class="position-btn" onclick="setPosition('bottom-center', this)" aria-pressed="false" aria-label="Bottom center">↓ Bottom Center</button>
+                    <button class="position-btn" onclick="setPosition('bottom-right', this)" aria-pressed="false" aria-label="Bottom right corner">↘ Bottom Right</button>
                 </div>
 
                 <!-- Advanced Export Settings -->
@@ -1511,8 +1632,9 @@
                         
                         <div class="setting-item">
                             <label>Multi-format Download:</label>
-                            <button class="process-btn secondary-btn" onclick="downloadAllFormats()" style="width: 100%; margin-top: 10px;">
-                                📦 Download All Formats
+                            <button class="process-btn secondary-btn" onclick="downloadAllFormats()" style="width: 100%; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                                Download All Formats
                             </button>
                             <small style="color: var(--text-muted); margin-top: 8px; display: block;">
                                 Downloads selected formats as ZIP file
@@ -1523,7 +1645,10 @@
 
                 <!-- Quick Presets -->
                 <div class="quick-presets" style="margin-top: 25px;">
-                    <h3 style="color: var(--text); margin-bottom: 15px;">⚡ Quick Settings</h3>
+                    <h3 style="color: var(--text); margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        Quick Settings
+                    </h3>
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                         <button class="preset-btn" onclick="applyPreset('subtle')" data-preset="subtle">
                             <div style="font-weight: 600;">Subtle Watermark</div>
@@ -1548,10 +1673,18 @@
                     <div class="setting-item">
                         <label>Preset Management:</label>
                         <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px;">
-                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="savePreset()">💾 Save</button>
-                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="loadPreset()">📁 Load</button>
-                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="resetSettings()">🔄 Reset</button>
-                            <button class="secondary-btn" style="padding: 8px 15px;" onclick="saveToFavorites()">⭐ Favorite</button>
+                            <button class="secondary-btn" style="padding: 8px 15px; display: flex; align-items: center; gap: 6px;" onclick="savePreset()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save
+                            </button>
+                            <button class="secondary-btn" style="padding: 8px 15px; display: flex; align-items: center; gap: 6px;" onclick="loadPreset()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Load
+                            </button>
+                            <button class="secondary-btn" style="padding: 8px 15px; display: flex; align-items: center; gap: 6px;" onclick="resetSettings()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Reset
+                            </button>
+                            <button class="secondary-btn" style="padding: 8px 15px; display: flex; align-items: center; gap: 6px;" onclick="saveToFavorites()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Favorite
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1561,14 +1694,17 @@
 
             <section class="process-section" aria-label="Processing">
                 <div class="process-controls">
-                    <button class="process-btn" id="processBtn" onclick="processAllImages()" disabled aria-describedby="process-desc">
-                        🚀 Process All Images
+                    <button class="process-btn" id="processBtn" onclick="processAllImages()" disabled aria-describedby="process-desc" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                        Process All Images
                     </button>
-                    <button class="process-btn secondary-btn" onclick="previewSingle()" id="previewBtn" disabled>
-                        👁️ Preview
+                    <button class="process-btn secondary-btn" onclick="previewSingle()" id="previewBtn" disabled style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        Preview
                     </button>
-                    <button class="process-btn secondary-btn" onclick="undoLast()" id="undoBtn" disabled>
-                        ↶ Undo
+                    <button class="process-btn secondary-btn" onclick="undoLast()" id="undoBtn" disabled style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"></path><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"></path></svg>
+                        Undo
                     </button>
                 </div>
                 <small id="process-desc">Activated after uploading main images and watermark</small>
@@ -1601,17 +1737,21 @@
 
             <section class="results-section" id="resultsSection" aria-label="Results">
                 <h2 class="results-title">
-                    ✅ Processed Images
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    Processed Images
                 </h2>
                 <div class="results-controls">
-                    <button class="download-all-btn" onclick="downloadAllImages()">
-                        📦 Download All (ZIP)
+                    <button class="download-all-btn" onclick="downloadAllImages()" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                        Download All (ZIP)
                     </button>
-                    <button class="download-all-btn clear-results-btn" onclick="clearResults()">
-                        🗑️ Clear Results
+                    <button class="download-all-btn clear-results-btn" onclick="clearResults()" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        Clear Results
                     </button>
-                    <button class="download-all-btn secondary-btn" onclick="shareResults()">
-                        📤 Share
+                    <button class="download-all-btn secondary-btn" onclick="shareResults()" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                        Share
                     </button>
                 </div>
                 <div class="results-grid" id="resultsGrid"></div>
@@ -1645,15 +1785,143 @@
 
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
-        // Global Variables and Configuration
+        // Enhanced Global Configuration
         const CONFIG = {
-            MAX_FILE_SIZE: 10 * 1024 * 1024, // 10MB
-            MAX_WATERMARK_SIZE: 5 * 1024 * 1024, // 5MB
+            MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB
+            MAX_WATERMARK_SIZE: 10 * 1024 * 1024, // 10MB
             SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-            MAX_CANVAS_SIZE: 8192,
-            WORKER_ENABLED: typeof Worker !== 'undefined'
+            MAX_CANVAS_SIZE: 32000, // Increased for long images
+            WORKER_ENABLED: typeof Worker !== 'undefined',
+            // New performance and feature configs
+            BATCH_SIZE: 5, // Process 5 images at a time
+            MEMORY_THRESHOLD: 512 * 1024 * 1024, // 512MB memory limit
+            AUTOSAVE_INTERVAL: 30000, // 30 seconds
+            THUMBNAIL_SIZE: { width: 150, height: 150 },
+            QUALITY_PRESETS: {
+                draft: { jpeg: 0.6, webp: 0.5, png: 0.7 },
+                standard: { jpeg: 0.8, webp: 0.75, png: 0.85 },
+                high: { jpeg: 0.95, webp: 0.9, png: 1.0 }
+            },
+            SUPPORTED_LANGUAGES: ['tr', 'en', 'de', 'fr', 'es'],
+            CLOUD_STORAGE: {
+                maxFileSize: 50 * 1024 * 1024,
+                supportedProviders: ['gdrive', 'dropbox', 'onedrive']
+            }
         };
+
+        // Advanced Feature Flags
+        const FEATURES = {
+            AI_POSITIONING: false,
+            CLOUD_SYNC: false,
+            COLLABORATIVE_EDITING: false,
+            VIDEO_WATERMARKING: false,
+            BATCH_TEMPLATES: true,
+            ADVANCED_ANALYTICS: true,
+            OFFLINE_MODE: true,
+            USE_WEBWORKER: typeof OffscreenCanvas !== 'undefined'
+        };
+
+        // ============================================
+        // HIGH PRIORITY 1: Image Cache System (LRU)
+        // ============================================
+        class ImageCache {
+            constructor(maxSize = 50) {
+                this.cache = new Map();
+                this.maxSize = maxSize;
+                this.accessOrder = [];
+            }
+
+            set(key, value) {
+                if (this.cache.size >= this.maxSize) {
+                    const lruKey = this.accessOrder.shift();
+                    this.cache.delete(lruKey);
+                }
+                this.cache.set(key, value);
+                this.accessOrder.push(key);
+            }
+
+            get(key) {
+                if (this.cache.has(key)) {
+                    this.accessOrder = this.accessOrder.filter(k => k !== key);
+                    this.accessOrder.push(key);
+                    return this.cache.get(key);
+                }
+                return null;
+            }
+
+            has(key) { return this.cache.has(key); }
+            clear() { this.cache.clear(); this.accessOrder = []; }
+        }
+
+        const imageCache = new ImageCache(30);
+
+        // ============================================
+        // HIGH PRIORITY 2: Progressive Export with toBlob()
+        // ============================================
+        class ProgressiveExporter {
+            static async canvasToBlob(canvas, format = 'image/jpeg', quality = 0.85) {
+                return new Promise((resolve, reject) => {
+                    canvas.toBlob(blob => blob ? resolve(blob) : reject(new Error('Blob failed')), format, quality);
+                });
+            }
+
+            static async blobToDataURL(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+
+            static async exportImage(canvas, format, quality) {
+                try {
+                    const blob = await this.canvasToBlob(canvas, format, quality);
+                    return { blob, dataURL: await this.blobToDataURL(blob), size: blob.size };
+                } catch (e) {
+                    const dataURL = canvas.toDataURL(format, quality);
+                    return { blob: null, dataURL, size: Math.round(dataURL.length * 0.75) };
+                }
+            }
+
+            static async downloadBlob(blob, filename) {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+            }
+        }
+
+        // ============================================
+        // HIGH PRIORITY 3: Lazy Loading for Gallery
+        // ============================================
+        class LazyLoadManager {
+            constructor() {
+                this.observer = null;
+                if ('IntersectionObserver' in window) {
+                    this.observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const img = entry.target;
+                                if (img.dataset.src) {
+                                    img.src = img.dataset.src;
+                                    img.removeAttribute('data-src');
+                                    this.observer.unobserve(img);
+                                }
+                            }
+                        });
+                    }, { rootMargin: '50px', threshold: 0.1 });
+                }
+            }
+            observe(el) { if (this.observer && el) this.observer.observe(el); }
+            disconnect() { if (this.observer) this.observer.disconnect(); }
+        }
+
+        const lazyLoader = new LazyLoadManager();
 
         // Application State
         class AppState {
@@ -1670,6 +1938,7 @@
                     rotation: 0,
                     mode: 'position',
                     position: 'top-left',
+                    customPos: { x: 0.5, y: 0.5 }, // 0-1 percentages
                     blendMode: 'normal',
                     padding: 20,
                     // Text settings
@@ -1679,13 +1948,26 @@
                     textColor: '#ffffff',
                     textStroke: 2,
                     textStrokeColor: '#000000',
+                    // Text Background
+                    textBgEnabled: false,
+                    textBgColor: '#000000',
+                    textBgOpacity: 50,
+                    textBgPadding: 10,
+                    textBgRadius: 4,
+                    // QR Settings
+                    qrContent: '',
+                    qrColor: '#000000',
+                    qrBgColor: '#ffffff',
                     // Effects
                     shadowBlur: 0,
                     shadowOffset: 0,
                     shadowColor: '#000000',
                     brightness: 100,
                     contrast: 100,
-                    saturation: 100
+                    saturation: 100,
+                    // Output settings
+                    outputQuality: 0.85, // 0-1 quality for JPEG/WEBP
+                    preserveFormat: true // Keep original format when possible
                 };
                 this.theme = localStorage.getItem('theme') || 'light';
                 this.previewMode = false;
@@ -1707,15 +1989,15 @@
                 if (this.undoStack.length > 0) {
                     const previousState = this.undoStack.pop();
                     this.settings = previousState.settings;
-                    this.updateAllSliders();
+                    updateAllSliders();
                     this.updateUndoButton();
-                    this.updatePreview();
+                    updatePreview();
                 }
             }
 
             updateUndoButton() {
                 const undoBtn = document.getElementById('undoBtn');
-                undoBtn.disabled = this.undoStack.length === 0;
+                if (undoBtn) undoBtn.disabled = this.undoStack.length === 0;
             }
         }
 
@@ -1726,14 +2008,14 @@
                 alertDiv.className = `alert alert-${type}`;
                 
                 const icon = {
-                    error: '❌',
-                    warning: '⚠️',
-                    success: '✅',
-                    info: 'ℹ️'
-                }[type] || '❌';
+                    error: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+                    warning: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+                    success: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+                    info: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>'
+                }[type] || '';
 
                 alertDiv.innerHTML = `
-                    <span>${icon} ${message}</span>
+                    <span style="display: flex; align-items: center; gap: 10px;">${icon} ${message}</span>
                     <button class="close-btn" onclick="this.parentElement.remove()" aria-label="Close">&times;</button>
                 `;
                 
@@ -1765,25 +2047,78 @@
         // File Validation
         class FileValidator {
             static validate(file, isWatermark = false) {
+                if (!file || typeof file !== 'object') {
+                    throw new Error('Invalid file');
+                }
+
+                // Security: Check file name for malicious patterns
+                const dangerousExtensions = /\.(exe|bat|cmd|com|pif|scr|vbs|js|jar|php|asp|aspx)$/i;
+                if (dangerousExtensions.test(file.name)) {
+                    throw new Error('Security risk: This file type is not supported');
+                }
+
                 const maxSize = isWatermark ? CONFIG.MAX_WATERMARK_SIZE : CONFIG.MAX_FILE_SIZE;
                 
                 if (!CONFIG.SUPPORTED_FORMATS.includes(file.type)) {
-                    throw new Error(`Unsupported file format: ${file.type}`);
+                    throw new Error(`Unsupported file format: ${file.type.replace(/[<>]/g, '')}`);
                 }
                 
                 if (file.size > maxSize) {
                     const maxSizeMB = Math.round(maxSize / (1024 * 1024));
-                    throw new Error(`File size cannot exceed ${maxSizeMB}MB`);
+                    throw new Error(`File size cannot exceed ${maxSizeMB}MB (Current: ${(file.size/(1024*1024)).toFixed(1)}MB)`);
+                }
+                
+                if (file.size === 0) {
+                    throw new Error('File is empty or corrupted');
                 }
                 
                 return true;
             }
 
             static validateImage(img) {
-                if (img.width > CONFIG.MAX_CANVAS_SIZE || img.height > CONFIG.MAX_CANVAS_SIZE) {
-                    throw new Error(`Image size too large (Max: ${CONFIG.MAX_CANVAS_SIZE}px)`);
+                if (!img || !img.width || !img.height) {
+                    throw new Error('Invalid image file');
                 }
+
+                // Check for minimum dimensions
+                if (img.width < 10 || img.height < 10) {
+                    throw new Error('Image is too small (min: 10x10 pixels)');
+                }
+
+                // Relaxed validation for very large images, just warn instead of error
+                if (img.width > CONFIG.MAX_CANVAS_SIZE || img.height > CONFIG.MAX_CANVAS_SIZE) {
+                    console.warn(`Image dimensions (${img.width}x${img.height}) exceed recommended limit. Processing may be slow.`);
+                    ErrorHandler.show(
+                        `Large image detected (${img.width}x${img.height}). Processing may be slow.`,
+                        'warning',
+                        4000
+                    );
+                }
+
+                // Check aspect ratio for extreme values
+                const aspectRatio = img.width / img.height;
+                if (aspectRatio > 10 || aspectRatio < 0.1) {
+                    console.warn(`Extreme aspect ratio: ${aspectRatio.toFixed(2)}`);
+                    ErrorHandler.show(
+                        'This image is very wide or very tall. Watermark may not display properly.',
+                        'warning',
+                        3000
+                    );
+                }
+
                 return true;
+            }
+
+            static sanitizeFileName(filename) {
+                // Remove or replace dangerous characters
+                return filename.replace(/[<>:"/\\|?*\x00-\x1f]/g, '_')
+                              .substring(0, 255)  // Limit length
+                              .trim();
+            }
+
+            static validateFileExtension(filename, allowedExtensions) {
+                const ext = filename.toLowerCase().split('.').pop();
+                return allowedExtensions.includes(ext);
             }
         }
 
@@ -1922,7 +2257,9 @@
             localStorage.setItem('theme', appState.theme);
             
             const themeBtn = document.querySelector('.theme-toggle');
-            themeBtn.textContent = appState.theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+            themeBtn.innerHTML = appState.theme === 'light' ? 
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Dark Mode' : 
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> Light Mode';
             
             ErrorHandler.show(
                 `${appState.theme === 'light' ? 'Light' : 'Dark'} theme activated`,
@@ -1935,7 +2272,9 @@
         function initializeTheme() {
             document.documentElement.setAttribute('data-theme', appState.theme);
             const themeBtn = document.querySelector('.theme-toggle');
-            themeBtn.textContent = appState.theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode';
+            themeBtn.innerHTML = appState.theme === 'light' ? 
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg> Dark Mode' : 
+                '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg> Light Mode';
         }
 
         // Tab Management
@@ -2053,6 +2392,11 @@
                                 FileValidator.validateImage(img);
                                 
                                 if (type === 'main') {
+                                    // Backup original watermark when first main image is loaded
+                                    if (!appState.uploadedWatermark && appState.watermark) {
+                                        appState.uploadedWatermark = appState.watermark;
+                                    }
+                                    
                                     appState.mainImages.push({
                                         img,
                                         name: file.name,
@@ -2069,6 +2413,12 @@
                                         3000
                                     );
                                 } else {
+                                    // Store original watermark for QR restore functionality
+                                    if (appState.watermark && !appState.uploadedWatermark) {
+                                        appState.uploadedWatermark = appState.watermark;
+                                        document.getElementById('restoreWatermarkBtn').style.display = 'block';
+                                    }
+                                    
                                     appState.watermark = img;
                                     updateWatermarkDisplay(img, file);
                                     updateProcessButtons();
@@ -2084,19 +2434,19 @@
                                 updatePreview();
                                 resolve();
                             } catch (error) {
-                                ErrorHandler.show(error.message);
+                                ErrorHandler.show('Image loading error: ' + error.message);
                                 reject(error);
                             }
                         };
                         img.onerror = (e) => {
-                            const error = new Error('Failed to load image. Please check if the file is corrupted.');
+                            const error = new Error('Image could not be loaded. Please check if the file is corrupted.');
                             ErrorHandler.show(error.message);
                             reject(error);
                         };
                         img.src = e.target.result;
                     };
                     reader.onerror = (e) => {
-                        const error = new Error('Failed to read file. Please try again.');
+                        const error = new Error('File could not be read. Please try again.');
                         ErrorHandler.show(error.message);
                         reject(error);
                     };
@@ -2104,7 +2454,8 @@
                 });
                 
             } catch (error) {
-                ErrorHandler.show(error.message);
+                ErrorHandler.show('File loading error: ' + error.message);
+                throw error;
             }
         }
 
@@ -2115,31 +2466,44 @@
             
             if (appState.mainImages.length > 0) {
                 box.classList.add('has-image');
+                
+                // Safely escape HTML content
+                const escapeHtml = (text) => {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                };
+
                 gallery.innerHTML = appState.mainImages.map((item, index) => `
                     <div class="gallery-item" role="listitem">
-                        <img src="${item.img.src}" alt="${item.name}" loading="lazy">
-                        <button class="remove-btn" onclick="removeImage(${index})" aria-label="Remove ${item.name} image">×</button>
+                        <img src="${item.img.src}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDJMMTMuMDkgOC4yNkwyMiA5TDE3IDE0TDE4LjE4IDIxTDEyIDE4TDUuODIgMjFMNyAxNEwyIDlMMTAuOTEgOC4yNkwxMiAyWiIgZmlsbD0iI2NjYyIvPgo8L3N2Zz4='; this.alt='Image could not be loaded';">
+                        <button class="remove-btn" onclick="removeImage(${index})" aria-label="Remove ${escapeHtml(item.name)}">×</button>
                     </div>
                 `).join('');
                 
                 // Show clear button
-                document.getElementById('clearImagesBtn').style.display = 'block';
+                const clearBtn = document.getElementById('clearImagesBtn');
+                if (clearBtn) clearBtn.style.display = 'block';
                 
                 // Update file info
                 const totalSize = appState.mainImages.reduce((sum, item) => sum + item.size, 0);
-                const fileInfo = box.querySelector('.file-info') || document.createElement('div');
-                fileInfo.className = 'file-info';
+                let fileInfo = box.querySelector('.file-info');
+                if (!fileInfo) {
+                    fileInfo = document.createElement('div');
+                    fileInfo.className = 'file-info';
+                    box.appendChild(fileInfo);
+                }
+                
                 fileInfo.innerHTML = `
                     <strong>${appState.mainImages.length}</strong> images loaded
                     (<strong>${PerformanceManager.formatFileSize(totalSize)}</strong>)
+                    ${appState.mainImages.length > 10 ? '<br><small style="color: var(--warning);">⚠️ Many images - processing may be slow</small>' : ''}
                 `;
-                if (!box.querySelector('.file-info')) {
-                    box.appendChild(fileInfo);
-                }
             } else {
                 box.classList.remove('has-image');
                 gallery.innerHTML = '';
-                document.getElementById('clearImagesBtn').style.display = 'none';
+                const clearBtn = document.getElementById('clearImagesBtn');
+                if (clearBtn) clearBtn.style.display = 'none';
                 const fileInfo = box.querySelector('.file-info');
                 if (fileInfo) fileInfo.remove();
             }
@@ -2148,12 +2512,33 @@
         // Update Watermark Display
         function updateWatermarkDisplay(img, file) {
             const box = elements.watermarkBox;
+            
+            // Safely escape HTML content
+            const escapeHtml = (text) => {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            };
+
+            const sanitizedFileName = FileValidator.sanitizeFileName(file.name);
+            
             box.innerHTML = `
-                <img src="${img.src}" alt="Watermark preview" style="max-height: 150px; margin-bottom: 15px;">
-                <p style="color: var(--success); font-weight: 600;">✓ Watermark loaded</p>
-                <div class="file-info">
-                    <strong>${file.name}</strong><br>
-                    <small>${PerformanceManager.formatFileSize(file.size)}</small>
+                <img src="${img.src}" alt="Watermark preview" style="max-height: 150px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 8px var(--shadow);" onerror="this.style.display='none'; this.nextElementSibling.textContent='Watermark preview could not be loaded'">
+                <p style="color: var(--success); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    Watermark loaded
+                </p>
+                <div class="file-info enhanced">
+                    <div>
+                        <strong>${escapeHtml(sanitizedFileName)}</strong><br>
+                        <div class="file-specs">
+                            <small>${PerformanceManager.formatFileSize(file.size)} • ${img.width}×${img.height}px</small>
+                            ${img.width / img.height > 3 || img.height / img.width > 3 ? '<br><small style="color: var(--warning);">⚠️ Extreme aspect ratio</small>' : ''}
+                        </div>
+                    </div>
+                    ${file.type === 'image/png' ? '<span class="perf-badge" style="background: var(--success); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px;">PNG</span>' : ''}
                 </div>
             `;
             box.classList.add('has-image');
@@ -2203,8 +2588,12 @@
                 { id: 'sizeSlider', value: 'sizeValue', setting: 'size' },
                 { id: 'rotationSlider', value: 'rotationValue', setting: 'rotation' },
                 { id: 'paddingSlider', value: 'paddingValue', setting: 'padding' },
+                { id: 'qualitySlider', value: 'qualityValue', setting: 'outputQuality', multiplier: 0.01 },
                 { id: 'textSizeSlider', value: 'textSizeValue', setting: 'textSize' },
                 { id: 'textStrokeSlider', value: 'textStrokeValue', setting: 'textStroke' },
+                { id: 'textBgOpacitySlider', value: 'textBgOpacityValue', setting: 'textBgOpacity' },
+                { id: 'textBgPaddingSlider', value: 'textBgPaddingValue', setting: 'textBgPadding' },
+                { id: 'textBgRadiusSlider', value: 'textBgRadiusValue', setting: 'textBgRadius' },
                 { id: 'shadowBlurSlider', value: 'shadowBlurValue', setting: 'shadowBlur' },
                 { id: 'shadowOffsetSlider', value: 'shadowOffsetValue', setting: 'shadowOffset' },
                 { id: 'brightnessSlider', value: 'brightnessValue', setting: 'brightness' },
@@ -2212,19 +2601,37 @@
                 { id: 'saturationSlider', value: 'saturationValue', setting: 'saturation' }
             ];
 
-            sliders.forEach(({ id, value, setting }) => {
+            sliders.forEach(({ id, value, setting, multiplier }) => {
                 const slider = document.getElementById(id);
                 const valueSpan = document.getElementById(value);
                 
                 if (slider && valueSpan) {
                     slider.addEventListener('input', (e) => {
-                        const val = parseInt(e.target.value);
+                        const rawVal = parseInt(e.target.value);
+                        const val = multiplier ? rawVal * multiplier : rawVal;
                         appState.settings[setting] = val;
                         const suffix = setting === 'rotation' ? '°' :
-                                      (setting === 'opacity' || setting.includes('brightness') || setting.includes('contrast') || setting.includes('saturation')) ? '%' :
+                                      (setting === 'opacity' || setting.includes('Opacity') || setting.includes('brightness') || setting.includes('contrast') || setting.includes('saturation')) ? '%' :
                                       setting.includes('Size') ? 'px' :
-                                      setting.includes('padding') || setting.includes('Blur') || setting.includes('Offset') || setting.includes('Stroke') ? 'px' : '';
+                                      setting.includes('padding') || setting.includes('Padding') || setting.includes('Blur') || setting.includes('Offset') || setting.includes('Stroke') || setting.includes('Radius') ? 'px' : '';
                         valueSpan.textContent = val + suffix;
+                        updatePreview();
+                        appState.saveState();
+                    });
+                }
+            });
+
+            // Checkbox inputs
+            const checkboxes = [
+                { id: 'textBgEnabled', setting: 'textBgEnabled' },
+                { id: 'preserveFormat', setting: 'preserveFormat' }
+            ];
+            
+            checkboxes.forEach(({ id, setting }) => {
+                const checkbox = document.getElementById(id);
+                if (checkbox) {
+                    checkbox.addEventListener('change', (e) => {
+                        appState.settings[setting] = e.target.checked;
                         updatePreview();
                         appState.saveState();
                     });
@@ -2238,6 +2645,14 @@
                     appState.settings.textContent = e.target.value;
                     updatePreview();
                     updateProcessButtons();
+                });
+            }
+            
+            // QR inputs
+            const qrContent = document.getElementById('qrContent');
+            if (qrContent) {
+                qrContent.addEventListener('input', (e) => {
+                    appState.settings.qrContent = e.target.value;
                 });
             }
 
@@ -2258,6 +2673,9 @@
             const colors = [
                 { id: 'textColor', value: 'textColorValue', setting: 'textColor' },
                 { id: 'textStrokeColor', value: 'textStrokeColorValue', setting: 'textStrokeColor' },
+                { id: 'textBgColor', value: 'textBgColorValue', setting: 'textBgColor' },
+                { id: 'qrColor', value: 'qrColorValue', setting: 'qrColor' },
+                { id: 'qrBgColor', value: 'qrBgColorValue', setting: 'qrBgColor' },
                 { id: 'shadowColor', value: 'shadowColorValue', setting: 'shadowColor' }
             ];
 
@@ -2276,29 +2694,119 @@
             });
         }
 
+        // QR Code Management
+        function generateAndSetQR() {
+            const content = appState.settings.qrContent;
+            if (!content) {
+                ErrorHandler.show('Please enter text or URL for the QR code', 'warning');
+                return;
+            }
+            
+            // Create temporary container
+            const tempDiv = document.createElement('div');
+            
+            // Generate QR
+            try {
+                new QRCode(tempDiv, {
+                    text: content,
+                    width: 512,
+                    height: 512,
+                    colorDark: appState.settings.qrColor,
+                    colorLight: appState.settings.qrBgColor,
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                
+                // Wait for QR code to be generated (it's usually canvas or img)
+                setTimeout(() => {
+                    const canvas = tempDiv.querySelector('canvas');
+                    const img = tempDiv.querySelector('img');
+                    const src = canvas ? canvas.toDataURL() : (img ? img.src : null);
+                    
+                    if (src) {
+                        const qrImage = new Image();
+                        qrImage.onload = () => {
+                            // Save original watermark if not saved yet
+                            if (!appState.uploadedWatermark && appState.watermark) {
+                                appState.uploadedWatermark = appState.watermark;
+                                document.getElementById('restoreWatermarkBtn').style.display = 'block';
+                            } else if (!appState.uploadedWatermark) {
+                                // If no watermark was uploaded, we don't show restore button yet, 
+                                // but we set this as the "uploaded" one effectively for logic consistency? 
+                                // No, better to track explicitly.
+                            }
+                            
+                            appState.watermark = qrImage;
+                            updatePreview();
+                            updateProcessButtons();
+                            
+                            // Show preview in panel
+                            const previewContainer = document.getElementById('qrPreviewContainer');
+                            previewContainer.innerHTML = '';
+                            const previewImg = new Image();
+                            previewImg.src = src;
+                            previewImg.style.width = '150px';
+                            previewImg.style.border = '2px solid var(--border)';
+                            previewImg.style.borderRadius = '8px';
+                            previewContainer.appendChild(previewImg);
+                            
+                            ErrorHandler.show('QR Code generated and set as watermark!', 'success');
+                        };
+                        qrImage.src = src;
+                    } else {
+                        ErrorHandler.show('Failed to generate QR code image', 'error');
+                    }
+                }, 100);
+                
+            } catch (e) {
+                console.error(e);
+                ErrorHandler.show('Error generating QR code: ' + e.message, 'error');
+            }
+        }
+        
+        function restoreUploadedWatermark() {
+            if (appState.uploadedWatermark) {
+                appState.watermark = appState.uploadedWatermark;
+                updatePreview();
+                updateProcessButtons();
+                document.getElementById('restoreWatermarkBtn').style.display = 'none';
+                appState.uploadedWatermark = null; // Clear backup
+                ErrorHandler.show('Original watermark restored', 'success');
+            }
+        }
+
         // Mode Management
-        function setMode(mode) {
+        function setMode(mode, element = null) {
             appState.settings.mode = mode;
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
                 btn.setAttribute('aria-pressed', 'false');
             });
-            event.target.classList.add('active');
-            event.target.setAttribute('aria-pressed', 'true');
+            
+            // Use passed element or find by mode value
+            const activeBtn = element || document.querySelector(`[onclick*="'${mode}'"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-pressed', 'true');
+            }
             
             elements.positionGrid.style.display = mode === 'position' ? 'grid' : 'none';
             updatePreview();
             appState.saveState();
         }
 
-        function setPosition(position) {
+        function setPosition(position, element = null) {
             appState.settings.position = position;
             document.querySelectorAll('.position-btn').forEach(btn => {
                 btn.classList.remove('active');
                 btn.setAttribute('aria-pressed', 'false');
             });
-            event.target.classList.add('active');
-            event.target.setAttribute('aria-pressed', 'true');
+            
+            // Use passed element or find by position value
+            const activeBtn = element || document.querySelector(`[onclick*="'${position}'"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-pressed', 'true');
+            }
             updatePreview();
             appState.saveState();
         }
@@ -2405,20 +2913,62 @@
             if (appState.settings.textContent.trim()) {
                 const fontSize = appState.settings.textSize;
                 ctx.font = `${fontSize}px ${appState.settings.fontFamily}`;
-                ctx.fillStyle = appState.settings.textColor;
-                ctx.strokeStyle = appState.settings.textStrokeColor;
-                ctx.lineWidth = appState.settings.textStroke;
                 
-                const textX = x + (appState.watermark ? 0 : 50);
-                const textY = y + (appState.watermark ? 0 : fontSize);
+                // Calculate metrics for background
+                const metrics = ctx.measureText(appState.settings.textContent);
+                const textWidth = metrics.width;
+                const textHeight = fontSize; // Approximation
+                
+                // Align text with image if both exist, otherwise use raw position
+                const textX = x + (appState.watermark ? 0 : 0);
+                const textY = y + (appState.watermark ? 0 : 0);
                 
                 ctx.translate(textX, textY);
                 ctx.rotate(rotation);
                 
-                if (appState.settings.textStroke > 0) {
-                    ctx.strokeText(appState.settings.textContent, 0, 0);
+                // Draw Background if enabled
+                if (appState.settings.textBgEnabled) {
+                    const pad = appState.settings.textBgPadding;
+                    const radius = appState.settings.textBgRadius;
+                    const bgX = -pad; // since we are drawing text at 0,0 (translated)
+                    const bgY = 0; // textBaseline is top
+                    const bgWidth = textWidth + (pad * 2);
+                    const bgHeight = textHeight + (pad * 2);
+                    
+                    ctx.save();
+                    ctx.fillStyle = appState.settings.textBgColor;
+                    ctx.globalAlpha = (appState.settings.opacity / 100) * (appState.settings.textBgOpacity / 100);
+                    
+                    // Draw rounded rect
+                    ctx.beginPath();
+                    ctx.moveTo(bgX + radius, bgY);
+                    ctx.lineTo(bgX + bgWidth - radius, bgY);
+                    ctx.quadraticCurveTo(bgX + bgWidth, bgY, bgX + bgWidth, bgY + radius);
+                    ctx.lineTo(bgX + bgWidth, bgY + bgHeight - radius);
+                    ctx.quadraticCurveTo(bgX + bgWidth, bgY + bgHeight, bgX + bgWidth - radius, bgY + bgHeight);
+                    ctx.lineTo(bgX + radius, bgY + bgHeight);
+                    ctx.quadraticCurveTo(bgX, bgY + bgHeight, bgX, bgY + bgHeight - radius);
+                    ctx.lineTo(bgX, bgY + radius);
+                    ctx.quadraticCurveTo(bgX, bgY, bgX + radius, bgY);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.restore();
                 }
-                ctx.fillText(appState.settings.textContent, 0, 0);
+
+                ctx.fillStyle = appState.settings.textColor;
+                ctx.strokeStyle = appState.settings.textStrokeColor;
+                ctx.lineWidth = appState.settings.textStroke;
+                ctx.textBaseline = 'top';
+                
+                // Adjust text position to be inside the padding
+                const drawX = appState.settings.textBgEnabled ? 0 : 0;
+                const drawY = appState.settings.textBgEnabled ? appState.settings.textBgPadding : 0;
+                
+                if (appState.settings.textStroke > 0) {
+                    ctx.strokeText(appState.settings.textContent, drawX, drawY);
+                }
+                ctx.fillText(appState.settings.textContent, drawX, drawY);
                 
                 ctx.rotate(-rotation);
                 ctx.translate(-textX, -textY);
@@ -2428,14 +2978,22 @@
         }
 
         function drawGridWatermarks(ctx, canvasWidth, canvasHeight) {
-            const cols = Math.ceil(Math.sqrt(appState.settings.count));
-            const rows = Math.ceil(appState.settings.count / cols);
+            // Use a more robust grid calculation that covers the whole image
+            const total = appState.settings.count;
+            const aspectRatio = canvasWidth / canvasHeight;
+            
+            let cols = Math.ceil(Math.sqrt(total * aspectRatio));
+            let rows = Math.ceil(total / cols);
+            
+            // Adjust if we need more rows to fit count
+            if (cols * rows < total) rows++;
+
             const spacingX = canvasWidth / (cols + 1);
             const spacingY = canvasHeight / (rows + 1);
 
             let count = 0;
-            for (let row = 0; row < rows && count < appState.settings.count; row++) {
-                for (let col = 0; col < cols && count < appState.settings.count; col++) {
+            for (let row = 0; row < rows && count < total; row++) {
+                for (let col = 0; col < cols && count < total; col++) {
                     const x = spacingX * (col + 1);
                     const y = spacingY * (row + 1);
                     drawSingleWatermark(ctx, x, y, canvasWidth, canvasHeight);
@@ -2456,6 +3014,13 @@
         function getWatermarkPosition(canvasWidth, canvasHeight) {
             const padding = appState.settings.padding;
             const size = Math.min(canvasWidth, canvasHeight) * (appState.settings.size / 100);
+            
+            if (appState.settings.position === 'custom') {
+                 return {
+                    x: canvasWidth * appState.settings.customPos.x,
+                    y: canvasHeight * appState.settings.customPos.y
+                };
+            }
             
             const positions = {
                 'top-left': { x: padding, y: padding },
@@ -2485,35 +3050,57 @@
             const processedCounter = document.getElementById('processedImages');
             const timeCounter = document.getElementById('processingTime');
             
+            // Reset progress bar to 0% at start
+            progressFill.style.width = '0%';
+            progressFill.textContent = '0%';
+            processedCounter.textContent = '0';
+            timeCounter.textContent = '0.0';
+            
             progressBar.style.display = 'block';
             elements.processBtn.disabled = true;
             
             const startTime = performance.now();
             
+            const totalImages = appState.mainImages.length;
+            const batchSize = totalImages > 20 ? 4 : (totalImages > 10 ? 3 : 2);
+            let processedCount = 0;
+            
             try {
-                for (let i = 0; i < appState.mainImages.length; i++) {
-                    const imageStartTime = performance.now();
-                    const result = await processImage(appState.mainImages[i]);
-                    appState.processedResults.push(result);
+                // Process images in parallel batches for speed
+                for (let i = 0; i < totalImages; i += batchSize) {
+                    const batch = appState.mainImages.slice(i, Math.min(i + batchSize, totalImages));
+                    
+                    // Process batch in parallel
+                    const batchResults = await Promise.all(
+                        batch.map(imageData => processImage(imageData))
+                    );
+                    
+                    // Add results and update UI
+                    batchResults.forEach((result, idx) => {
+                        appState.processedResults.push(result);
+                        addResultToGrid(result, processedCount + idx);
+                    });
+                    
+                    processedCount += batchResults.length;
                     
                     // Update progress
-                    const progress = Math.round(((i + 1) / appState.mainImages.length) * 100);
+                    const progress = Math.round((processedCount / totalImages) * 100);
                     progressFill.style.width = progress + '%';
                     progressFill.textContent = progress + '%';
-                    processedCounter.textContent = i + 1;
+                    processedCounter.textContent = processedCount;
                     
                     const totalTime = PerformanceManager.measureTime(startTime);
                     timeCounter.textContent = totalTime;
                     
-                    // Add result to grid
-                    addResultToGrid(result, i);
-                    
-                    // Small delay for UI updates
-                    await new Promise(resolve => setTimeout(resolve, 50));
+                    // Small yield for UI responsiveness
+                    await new Promise(resolve => requestAnimationFrame(resolve));
                 }
                 
+                const finalTime = PerformanceManager.measureTime(startTime);
+                const avgTime = (parseFloat(finalTime) / totalImages).toFixed(2);
+                
                 ErrorHandler.show(
-                    `${appState.mainImages.length} images processed successfully!`,
+                    `${totalImages} images processed in ${finalTime}s (avg: ${avgTime}s/image)`,
                     'success'
                 );
                 
@@ -2528,9 +3115,20 @@
         }
 
         async function processImage(imageData) {
-            return new Promise((resolve) => {
+            try {
+                // Check cache first
+                const cacheKey = `${imageData.name}_${imageData.lastModified}_${JSON.stringify(appState.settings)}`;
+                const cached = imageCache.get(cacheKey);
+                if (cached) {
+                    return cached;
+                }
+
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
+                
+                if (!ctx) {
+                    throw new Error('Canvas context could not be created');
+                }
                 
                 canvas.width = imageData.img.width;
                 canvas.height = imageData.img.height;
@@ -2538,24 +3136,56 @@
                 // Draw original image
                 ctx.drawImage(imageData.img, 0, 0);
                 
-                // Simply draw watermarks on top of the original image
+                // Draw watermarks on top
                 drawWatermarks(ctx, canvas.width, canvas.height);
                 
-                // Generate result
+                // Determine output format
+                const originalExt = imageData.name.toLowerCase().split('.').pop();
+                let outputFormat = 'image/jpeg';
+                let outputQuality = appState.settings.outputQuality;
+                
+                if (appState.settings.preserveFormat) {
+                    if (originalExt === 'png') outputFormat = 'image/png';
+                    else if (originalExt === 'webp') outputFormat = 'image/webp';
+                }
+                
+                // For JPEG, fill background with white
+                let exportCanvas = canvas;
+                if (outputFormat === 'image/jpeg') {
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = canvas.width;
+                    tempCanvas.height = canvas.height;
+                    tempCtx.fillStyle = '#FFFFFF';
+                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    tempCtx.drawImage(canvas, 0, 0);
+                    exportCanvas = tempCanvas;
+                }
+                
+                // Use ProgressiveExporter with toBlob() for better memory management
+                const exported = await ProgressiveExporter.exportImage(exportCanvas, outputFormat, outputQuality);
+                
                 const result = {
-                    dataURL: canvas.toDataURL('image/png'),
+                    dataURL: exported.dataURL,
+                    blob: exported.blob,
                     originalName: imageData.name,
                     name: imageData.name,
-                    canvas: canvas,
-                    size: imageData.size,
+                    size: exported.size,
                     timestamp: Date.now()
                 };
                 
+                // Cache the result
+                imageCache.set(cacheKey, result);
+                
                 // Cleanup
                 PerformanceManager.cleanup(canvas);
+                if (exportCanvas !== canvas) PerformanceManager.cleanup(exportCanvas);
                 
-                resolve(result);
-            });
+                return result;
+            } catch (error) {
+                ErrorHandler.show('Image processing error: ' + error.message);
+                throw error;
+            }
         }
 
         function addResultToGrid(result, index) {
@@ -2618,9 +3248,9 @@
                     
                     // Generate the appropriate format
                     if (format === 'jpg') {
-                        dataURL = tempCanvas.toDataURL('image/jpeg', 0.95);
+                        dataURL = tempCanvas.toDataURL('image/jpeg', appState.settings.outputQuality);
                     } else if (format === 'webp') {
-                        dataURL = tempCanvas.toDataURL('image/webp', 0.95);
+                        dataURL = tempCanvas.toDataURL('image/webp', appState.settings.outputQuality);
                     }
                     
                     // Download the file
@@ -2702,14 +3332,44 @@
 
         // Preset Management
         function savePreset() {
-            const presetName = prompt('Preset name:', 'New Preset');
-            if (presetName) {
-                const presets = JSON.parse(localStorage.getItem('watermark_presets') || '{}');
-                presets[presetName] = { ...appState.settings };
-                localStorage.setItem('watermark_presets', JSON.stringify(presets));
-                
-                ErrorHandler.show(`"${presetName}" preset saved`, 'success');
-            }
+            const modal = document.createElement('div');
+            modal.className = 'loading-overlay';
+            modal.innerHTML = `
+                <div class="loading-content" style="text-align: left;">
+                    <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Save Preset</h3>
+                    <input type="text" class="modal-input" placeholder="Preset Name" style="width: 100%; margin: 15px 0; padding: 10px; border: 2px solid var(--border); border-radius: 8px; background: var(--surface-2); color: var(--text);">
+                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                        <button class="secondary-btn cancel-btn" style="padding: 8px 16px;">Cancel</button>
+                        <button class="process-btn save-btn" style="padding: 8px 16px;">Save</button>
+                    </div>
+                </div>
+            `;
+             
+            const input = modal.querySelector('.modal-input');
+            const cancelBtn = modal.querySelector('.cancel-btn');
+            const saveBtn = modal.querySelector('.save-btn');
+             
+            cancelBtn.onclick = () => modal.remove();
+             
+            const doSave = () => {
+                const presetName = input.value.trim();
+                if (presetName) {
+                    const presets = JSON.parse(localStorage.getItem('watermark_presets') || '{}');
+                    presets[presetName] = { ...appState.settings };
+                    localStorage.setItem('watermark_presets', JSON.stringify(presets));
+                    ErrorHandler.show(`"${presetName}" preset saved`, 'success');
+                    modal.remove();
+                } else {
+                    input.focus();
+                    input.style.borderColor = 'var(--error)';
+                }
+            };
+             
+            saveBtn.onclick = doSave;
+            input.onkeydown = (e) => { if (e.key === 'Enter') doSave(); };
+             
+            document.body.appendChild(modal);
+            input.focus();
         }
 
         function loadPreset() {
@@ -2720,15 +3380,59 @@
                 ErrorHandler.show('No saved presets found');
                 return;
             }
+
+            const modal = document.createElement('div');
+            modal.className = 'loading-overlay';
             
-            const presetName = prompt('Preset to load:\n' + presetNames.join('\n'));
-            if (presetName && presets[presetName]) {
-                appState.settings = { ...presets[presetName] };
-                updateAllSliders();
-                updatePreview();
-                
-                ErrorHandler.show(`"${presetName}" preset loaded`, 'success');
-            }
+            const listHtml = presetNames.map(name => `
+                <div class="preset-item" style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid var(--border);">
+                    <span style="font-weight: 500;">${name}</span>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="process-btn load-btn" data-name="${name}" style="padding: 6px 12px; font-size: 0.85rem;">Load</button>
+                        <button class="remove-btn delete-btn" data-name="${name}" style="position: static; opacity: 1; width: auto; padding: 6px 12px; height: auto; border-radius: 6px; background: var(--error); color: white; display: flex; align-items: center; justify-content: center;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            modal.innerHTML = `
+                <div class="loading-content" style="text-align: left; max-width: 450px; width: 90%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg> Load Preset</h3>
+                        <button class="secondary-btn close-btn" style="padding: 5px 10px;">✕</button>
+                    </div>
+                    <div class="preset-list" style="max-height: 400px; overflow-y: auto; margin-bottom: 15px; background: var(--surface-2); border-radius: 8px;">
+                        ${listHtml}
+                    </div>
+                </div>
+            `;
+            
+            modal.querySelector('.close-btn').onclick = () => modal.remove();
+            
+            modal.onclick = (e) => {
+                if (e.target.classList.contains('load-btn')) {
+                    const name = e.target.dataset.name;
+                    appState.settings = { ...presets[name] };
+                    updateAllSliders();
+                    updatePreview();
+                    ErrorHandler.show(`"${name}" preset loaded`, 'success');
+                    modal.remove();
+                } else if (e.target.classList.contains('delete-btn') || e.target.closest('.delete-btn')) {
+                    const btn = e.target.closest('.delete-btn');
+                    const name = btn.dataset.name;
+                    if (confirm(`Delete preset "${name}"?`)) {
+                        delete presets[name];
+                        localStorage.setItem('watermark_presets', JSON.stringify(presets));
+                        modal.remove();
+                        loadPreset(); // Refresh
+                    }
+                } else if (e.target === modal) {
+                    modal.remove();
+                }
+            };
+            
+            document.body.appendChild(modal);
         }
 
         function resetSettings() {
@@ -2739,6 +3443,7 @@
                 rotation: 0,
                 mode: 'position',
                 position: 'top-left',
+                customPos: { x: 0.5, y: 0.5 },
                 blendMode: 'normal',
                 padding: 20,
                 textContent: '',
@@ -2856,6 +3561,11 @@
                 <input type="file" id="watermarkInput" accept="image/*" aria-label="Select watermark file">
             `;
             
+            // Re-acquire DOM elements after innerHTML change
+            elements.mainImageInput = document.getElementById('mainImageInput');
+            elements.watermarkInput = document.getElementById('watermarkInput');
+            elements.mainGallery = document.getElementById('mainGallery');
+            
             // Re-setup event listeners
             setupFileInputs();
             setupClickHandlers();
@@ -2912,6 +3622,8 @@
                 }
             };
 
+            
+
             if (presets[presetType]) {
                 // Update settings
                 Object.assign(appState.settings, presets[presetType]);
@@ -2943,7 +3655,7 @@
                 };
                 localStorage.setItem('watermark_favorites', JSON.stringify(favorites));
                 
-                ErrorHandler.show(`"${favoriteName}" added to favorites ⭐`, 'success');
+                ErrorHandler.show(`"${favoriteName}" added to favorites <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`, 'success');
                 updateFavoritesList();
             }
         }
@@ -2975,13 +3687,27 @@
 
         // Mode and Position Button Updates
         function updateModeButtons() {
-            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[onclick*="'${appState.settings.mode}'"]`).classList.add('active');
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            const activeBtn = document.querySelector(`[onclick*="'${appState.settings.mode}'"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-pressed', 'true');
+            }
         }
 
         function updatePositionButtons() {
-            document.querySelectorAll('.position-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelector(`[onclick*="'${appState.settings.position}'"]`).classList.add('active');
+            document.querySelectorAll('.position-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+            const activeBtn = document.querySelector(`[onclick*="'${appState.settings.position}'"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.setAttribute('aria-pressed', 'true');
+            }
         }
 
         // Advanced Export System
@@ -3101,7 +3827,7 @@
                 link.download = `watermarked_multiformat_${Date.now()}.zip`;
                 link.click();
 
-                ErrorHandler.show(`${totalFiles} files exported successfully! 🎉`, 'success');
+                ErrorHandler.show(`${totalFiles} files exported successfully! <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><polyline points="20 6 9 17 4 12"></polyline></svg>`, 'success');
             } catch (error) {
                 ErrorHandler.show('Export error: ' + error.message, 'error');
             } finally {
@@ -3289,17 +4015,17 @@
                 
                 const modal = document.createElement('div');
                 modal.className = 'loading-overlay';
-                modal.innerHTML = `
-                    <div class="loading-content">
-                        <h3>🤖 Smart Suggestions</h3>
-                        <p>Optimized settings for your image:</p>
-                        ${suggestionHtml}
-                        <button onclick="this.closest('.loading-overlay').remove()"
-                                style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 8px; background: var(--secondary); color: white; cursor: pointer;">
-                            Close
-                        </button>
-                    </div>
-                `;
+            modal.innerHTML = `
+                <div class="loading-content">
+                    <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg> Smart Suggestions</h3>
+                    <p>Optimized settings for your image:</p>
+                    ${suggestionHtml}
+                    <button onclick="this.closest('.loading-overlay').remove()"
+                            style="margin-top: 20px; padding: 10px 20px; border: none; border-radius: 8px; background: var(--secondary); color: white; cursor: pointer;">
+                        Close
+                    </button>
+                </div>
+            `;
                 
                 document.body.appendChild(modal);
             }
@@ -3335,12 +4061,24 @@
             modal.className = 'loading-overlay';
             modal.innerHTML = `
                 <div class="loading-content">
-                    <h3>⚡ Quick Actions</h3>
+                    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: text-bottom;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Quick Actions</h3>
                     <div style="display: grid; gap: 15px; margin: 20px 0;">
-                        <button class="process-btn" onclick="quickLogo()">📱 Add Logo</button>
-                        <button class="process-btn" onclick="quickCopyright()">© Copyright</button>
-                        <button class="process-btn" onclick="quickWatermark()">🌊 Classic Watermark</button>
-                        <button class="process-btn secondary-btn" onclick="autoOptimize()">🤖 Auto Optimize</button>
+                        <button class="process-btn" onclick="quickLogo()" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                            Add Logo
+                        </button>
+                        <button class="process-btn" onclick="quickCopyright()" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M15 9.354a4 4 0 1 0 0 5.292"></path></svg>
+                            Copyright
+                        </button>
+                        <button class="process-btn" onclick="quickWatermark()" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                            Classic Watermark
+                        </button>
+                        <button class="process-btn secondary-btn" onclick="autoOptimize()" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>
+                            Auto Optimize
+                        </button>
                     </div>
                     <button onclick="this.closest('.loading-overlay').remove()"
                             style="padding: 8px 16px; border: none; border-radius: 8px; background: var(--secondary); color: white; cursor: pointer;">
@@ -3424,6 +4162,53 @@
             });
         }
 
+        // Canvas Interactions (Drag & Drop Watermark)
+        function setupCanvasInteractions() {
+            const canvas = elements.previewCanvas;
+            let isDragging = false;
+
+            canvas.style.cursor = 'move';
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (appState.mainImages.length === 0) return;
+                isDragging = true;
+                canvas.style.cursor = 'grabbing';
+                
+                appState.settings.mode = 'position';
+                appState.settings.position = 'custom';
+                updateModeButtons();
+                updatePositionButtons();
+                
+                handleDrag(e);
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    e.preventDefault(); // Prevent selection
+                    handleDrag(e);
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    canvas.style.cursor = 'move';
+                    appState.saveState();
+                }
+            });
+            
+            function handleDrag(e) {
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX - rect.left) / rect.width;
+                const y = (e.clientY - rect.top) / rect.height;
+                
+                appState.settings.customPos.x = Math.max(0, Math.min(1, x));
+                appState.settings.customPos.y = Math.max(0, Math.min(1, y));
+                
+                updatePreview();
+            }
+        }
+
         // Initialize Application
         function initializeApp() {
             initializeTheme();
@@ -3431,6 +4216,7 @@
             setupClickHandlers();
             setupFileInputs();
             setupSettings();
+            setupCanvasInteractions();
             setupKeyboardShortcuts();
             setupExportTab();
             
@@ -3442,7 +4228,7 @@
             // Add quick actions button to header
             const quickActionsBtn = document.createElement('button');
             quickActionsBtn.className = 'help-btn';
-            quickActionsBtn.textContent = '⚡ Quick Actions';
+            quickActionsBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 5px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Quick Actions';
             quickActionsBtn.onclick = showQuickActions;
             document.querySelector('.header-controls').insertBefore(
                 quickActionsBtn,
@@ -3452,10 +4238,12 @@
             // Show welcome message with tips
             setTimeout(() => {
                 const welcomeMsg = `
-                    Watermark Application is ready!
-                    💡 Tip: Smart suggestions will be shown when you upload your first image.
-                    ⚡ Use the Quick Actions button to quickly access common settings.
-                    Press F1 for detailed help.
+                    <div style="display: flex; flex-direction: column; gap: 5px;">
+                        <strong>Watermark Application is ready!</strong>
+                        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><line x1="9" y1="18" x2="15" y2="18"></line><line x1="10" y1="22" x2="14" y2="22"></line><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 9.5 6 4.65 4.65 0 0 0 8 11.5c0 1.3 1 2.4 1.5 4.5"></path></svg> Tip: Smart suggestions will be shown when you upload your first image.</span>
+                        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg> Use the Quick Actions button to quickly access common settings.</span>
+                        <span>Press F1 for detailed help.</span>
+                    </div>
                 `;
                 ErrorHandler.show(welcomeMsg, 'info', 6000);
             }, 1000);
