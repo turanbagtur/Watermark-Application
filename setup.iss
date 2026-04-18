@@ -2,7 +2,7 @@
 ; >>> CRÍTICO: Este AppId é o que faz o app aparecer na lista do Windows 11 <<<
 AppId={{F9A8B7C6-D5E4-1234-5678-90ABCDEF1234}
 AppName=Advanced Professional Watermark
-AppVersion=1.0.7
+AppVersion=1.0.9
 AppPublisher=VENSEV
 AppSupportURL=https://ko-fi.com/solderett
 

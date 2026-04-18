@@ -3168,6 +3168,12 @@
                     Size: ~${PerformanceManager.formatFileSize(result.dataURL.length * 0.75)}
                     ${result.performanceMetrics ? `• ${result.performanceMetrics.processingTime}s` : ''}
                 </div>
+                <div class="download-btns" style="margin-bottom: 8px;">
+                    <button class="download-btn" style="background: var(--primary-dark); width: 100%;" onclick="openAdjustModal(${index})">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg>
+                        Ajustar Posição
+                    </button>
+                </div>
                 <div class="download-btns">
                     <button class="download-btn png" onclick="downloadSingle(${index}, 'png')">PNG</button>
                     <button class="download-btn jpg" onclick="downloadSingle(${index}, 'jpg')">JPG</button>
@@ -3233,13 +3239,19 @@
                 const lastDir = localStorage.getItem('watermark_save_dir') || '';
                 
                 window.pywebview.api.save_file(finalFileName, b64Data, lastDir, format).then(result => {
-                    if (result === "CANCELLED") return; // Usuário fechou a janela
+                    if (result === "CANCELLED") return; 
                     
-                    if (result.startsWith("ERROR:")) {
+                    if (result === "FALLBACK_BROWSER") {
+                        ErrorHandler.show('O Windows bloqueou a pasta. Usando download seguro...', 'warning', 3000);
+                        // Burlar o bloqueio acionando o download nativo do motor web
+                        link.download = finalFileName;
+                        link.href = dataURL;
+                        link.click();
+                    } else if (result.startsWith("ERROR:")) {
                         ErrorHandler.show(result, 'error');
                     } else {
-                        localStorage.setItem('watermark_save_dir', result); // Salva na memória
-                        ErrorHandler.show(`${result.name} saved successfully`, 'success', 2000);
+                        localStorage.setItem('watermark_save_dir', result);
+                        ErrorHandler.show(`${result.name} salvo com sucesso`, 'success', 2000);
                     }
                 });
             } else {
@@ -3270,17 +3282,24 @@
                 
                 // Checa se estamos no Desktop (Python)
                 if (window.pywebview && window.pywebview.api) {
-                    const b64Content = await zip.generateAsync({ type: 'base64' }); // Gera direto em Base64
+                    const b64Content = await zip.generateAsync({ type: 'base64' });
                     const lastDir = localStorage.getItem('watermark_save_dir') || '';
                     
                     const result = await window.pywebview.api.save_file(fileName, b64Content, lastDir, 'zip');
                     
                     if (result !== "CANCELLED") {
-                        if (result.startsWith("ERROR:")) {
+                        if (result === "FALLBACK_BROWSER") {
+                            ErrorHandler.show('O Windows bloqueou a pasta. Usando modo de segurança...', 'warning');
+                            const content = await zip.generateAsync({ type: 'blob' });
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(content);
+                            link.download = fileName;
+                            link.click();
+                        } else if (result.startsWith("ERROR:")) {
                             ErrorHandler.show(result, 'error');
                         } else {
-                            localStorage.setItem('watermark_save_dir', result); // Salva na memória
-                            ErrorHandler.show('ZIP file saved successfully', 'success');
+                            localStorage.setItem('watermark_save_dir', result);
+                            ErrorHandler.show('ZIP salvo com sucesso', 'success');
                         }
                     }
                 } else {
@@ -4203,6 +4222,159 @@
                 appState.settings.customPos.y = Math.max(0, Math.min(1, y));
                 
                 updatePreview();
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE AJUSTE FINO INDIVIDUAL (UX/UI)
+        // ============================================
+        let currentAdjustIndex = -1;
+        let adjustPosPercent = { x: 0.5, y: 0.5 };
+        let isDraggingAdjust = false;
+
+        function openAdjustModal(index) {
+            currentAdjustIndex = index;
+            const originalData = appState.mainImages[index];
+            if (!originalData) {
+                ErrorHandler.show('Original image data lost. Clear and upload again.', 'error');
+                return;
+            }
+
+            // Define posição inicial baseada na configuração atual para não assustar o usuário
+            adjustPosPercent = { x: 0.5, y: 0.5 }; 
+
+            const modal = document.createElement('div');
+            modal.className = 'loading-overlay';
+            modal.id = 'adjustModal';
+            modal.innerHTML = `
+                <div class="loading-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg> Ajuste Fino de Posição</h3>
+                        <button class="secondary-btn close-btn" style="padding: 5px 10px;" onclick="document.getElementById('adjustModal').remove()">✕</button>
+                    </div>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Clique e arraste a marca d'água para a posição ideal. Isso afetará APENAS esta imagem.</p>
+                    
+                    <div style="position: relative; overflow: hidden; border-radius: 10px; background: var(--surface-2); flex-grow: 1; display: flex; justify-content: center; align-items: center; border: 2px dashed var(--border);">
+                        <canvas id="adjustCanvas" style="cursor: move; max-width: 100%; max-height: 60vh; box-shadow: 0 4px 15px var(--shadow);"></canvas>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
+                        <button class="secondary-btn" style="padding: 12px 25px;" onclick="document.getElementById('adjustModal').remove()">Cancelar</button>
+                        <button class="process-btn" style="padding: 12px 25px;" onclick="saveIndividualAdjustment()">Salvar Alteração</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+
+            const canvas = document.getElementById('adjustCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Otimiza tamanho do canvas para o modal
+            const opt = PerformanceManager.optimizeCanvas(originalData.img);
+            canvas.width = opt.width;
+            canvas.height = opt.height;
+
+            function renderAdjustCanvas() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(originalData.img, 0, 0, canvas.width, canvas.height);
+                
+                // Salva estado global
+                const backupMode = appState.settings.mode;
+                const backupPos = appState.settings.position;
+                const backupCustom = { ...appState.settings.customPos };
+
+                // Força modo customizado temporariamente para desenhar onde o mouse está
+                appState.settings.mode = 'position';
+                appState.settings.position = 'custom';
+                appState.settings.customPos = adjustPosPercent;
+
+                drawWatermarks(ctx, canvas.width, canvas.height);
+
+                // Restaura estado global
+                appState.settings.mode = backupMode;
+                appState.settings.position = backupPos;
+                appState.settings.customPos = backupCustom;
+            }
+
+            renderAdjustCanvas();
+
+            // Lógica de Arraste (Drag & Drop) no Canvas do Modal
+            canvas.addEventListener('mousedown', (e) => {
+                isDraggingAdjust = true;
+                updateAdjustPos(e);
+            });
+            canvas.addEventListener('mousemove', (e) => {
+                if (isDraggingAdjust) updateAdjustPos(e);
+            });
+            window.addEventListener('mouseup', () => {
+                isDraggingAdjust = false;
+            });
+
+            function updateAdjustPos(e) {
+                const rect = canvas.getBoundingClientRect();
+                // Calcula a porcentagem X e Y real considerando o redimensionamento do CSS (max-width/max-height)
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                
+                const x = ((e.clientX - rect.left) * scaleX) / canvas.width;
+                const y = ((e.clientY - rect.top) * scaleY) / canvas.height;
+                
+                adjustPosPercent.x = Math.max(0, Math.min(1, x));
+                adjustPosPercent.y = Math.max(0, Math.min(1, y));
+                
+                requestAnimationFrame(renderAdjustCanvas);
+            }
+        }
+
+        async function saveIndividualAdjustment() {
+            const index = currentAdjustIndex;
+            const originalData = appState.mainImages[index];
+            const modal = document.getElementById('adjustModal');
+            
+            const btn = modal.querySelector('.process-btn');
+            btn.innerHTML = '<svg class="loading-spinner" style="width:20px;height:20px;margin:0;border-width:2px;" viewBox="0 0 50 50"></svg> Processando...';
+            btn.disabled = true;
+
+            try {
+                // 1. Faz backup do estado global
+                const backupMode = appState.settings.mode;
+                const backupPos = appState.settings.position;
+                const backupCustom = { ...appState.settings.customPos };
+
+                // 2. Aplica a posição específica escolhida neste modal
+                appState.settings.mode = 'position';
+                appState.settings.position = 'custom';
+                appState.settings.customPos = adjustPosPercent;
+
+                // 3. Remove a imagem cacheada antiga se existir, para forçar reprocessamento
+                const oldCacheKey = `${originalData.name}_${originalData.lastModified}_${JSON.stringify(appState.settings)}`;
+                imageCache.cache.delete(oldCacheKey);
+
+                // 4. Reprocessa APENAS esta imagem
+                const newResult = await processImage(originalData);
+
+                // 5. Restaura o estado global
+                appState.settings.mode = backupMode;
+                appState.settings.position = backupPos;
+                appState.settings.customPos = backupCustom;
+
+                // 6. Atualiza o array de resultados e a UI
+                appState.processedResults[index] = newResult;
+                
+                // Recarrega apenas a imagem específica no DOM
+                const resultItems = document.getElementById('resultsGrid').children;
+                if (resultItems[index]) {
+                    const imgEl = resultItems[index].querySelector('img');
+                    if (imgEl) imgEl.src = newResult.dataURL;
+                }
+
+                ErrorHandler.show(`Posição ajustada para ${originalData.name}`, 'success');
+                modal.remove();
+
+            } catch (error) {
+                ErrorHandler.show('Erro ao ajustar imagem: ' + error.message, 'error');
+                btn.innerHTML = 'Tentar Novamente';
+                btn.disabled = false;
             }
         }
 

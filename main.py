@@ -28,8 +28,9 @@ class NativeAPI:
 
     def save_file(self, default_filename, b64_data, last_dir, file_type):
         try:
-            if not os.path.exists(last_dir):
-                last_dir = ''
+            # Proteção contra memória envenenada (impede abrir em Program Files)
+            if not last_dir or not os.path.exists(last_dir) or "Program Files" in last_dir:
+                last_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
                 
             file_types_filter = ('All Files (*.*)',)
             if file_type == 'zip':
@@ -50,9 +51,15 @@ class NativeAPI:
 
             if result and len(result) > 0:
                 file_path = result[0]
-                with open(file_path, 'wb') as f:
-                    f.write(base64.b64decode(b64_data))
-                return os.path.dirname(file_path)
+                try:
+                    # Tenta salvar via Backend Nativo
+                    with open(file_path, 'wb') as f:
+                        f.write(base64.b64decode(b64_data))
+                    return os.path.dirname(file_path)
+                    
+                except PermissionError:
+                    # Se o Windows Defender bloquear, devolve o controle para o Frontend (JS)
+                    return "FALLBACK_BROWSER"
             
             return "CANCELLED"
         except Exception as e:
