@@ -4,19 +4,19 @@ import sys
 import base64
 import logging
 
-# --- SISTEMA DE LOGS MELHORADO (Nível DEBUG) ---
+# --- ENHANCED LOGGING SYSTEM (DEBUG Level) ---
 appdata_dir = os.path.join(os.getenv('APPDATA'), 'WatermarkApp')
 os.makedirs(appdata_dir, exist_ok=True)
 log_file = os.path.join(appdata_dir, 'app_error.log')
 
 logging.basicConfig(
     filename=log_file,
-    level=logging.DEBUG,  # Força a capturar absolutamente tudo
+    level=logging.DEBUG,  # Force capture absolutely everything
     format='%(asctime)s - %(levelname)s - %(message)s',
     force=True
 )
 
-logging.info("=== WatermarkApp Inicializado com Nuitka ===")
+logging.info("=== WatermarkApp initialized with Nuitka ===")
 
 def get_asset_path(relative_path):
     base_path = os.path.dirname(os.path.abspath(__file__))
@@ -27,11 +27,11 @@ class NativeAPI:
         self.window = None
 
     def save_file(self, default_filename, b64_data, last_dir, file_type):
-        logging.info(f"Recebida requisição para salvar: {default_filename}")
+        logging.info(f"Save request received: {default_filename}")
         try:
             if not last_dir or not os.path.exists(last_dir) or "Program Files" in last_dir or "Windows" in last_dir:
                 last_dir = os.path.join(os.path.expanduser('~'), 'Downloads')
-                logging.debug(f"Diretório ajustado para: {last_dir}")
+                logging.debug(f"Directory adjusted to: {last_dir}")
 
             if file_type == 'zip':
                 file_types = ('ZIP Files (*.zip)', 'All Files (*.*)')
@@ -44,7 +44,7 @@ class NativeAPI:
             else:
                 file_types = ('All Files (*.*)',)
 
-            logging.debug("Abrindo janela de diálogo do sistema...")
+            logging.debug("Opening system file dialog...")
             result = self.window.create_file_dialog(
                 dialog_type=webview.SAVE_DIALOG,
                 directory=last_dir,
@@ -53,47 +53,47 @@ class NativeAPI:
             )
 
             if not result or len(result) == 0:
-                logging.info("Usuário cancelou o salvamento.")
+                logging.info("User canceled the save.")
                 return "CANCELLED"
 
-            # CORREÇÃO DO BUG DA PRIMEIRA LETRA
+            # FIRST LETTER BUG FIX
             if isinstance(result, (list, tuple)):
-                file_path = result[0]  # Se for uma lista, agarra o primeiro item
+                file_path = result[0]  # If it's a list, grab the first item
             else:
-                file_path = result     # Se for uma palavra (string), usa a palavra inteira
+                file_path = result     # If it's a string, use it directly
                 
-            logging.debug(f"Caminho escolhido pelo usuário: {file_path}")
+            logging.debug(f"User-selected path: {file_path}")
 
             try:
                 file_data = base64.b64decode(b64_data)
-                logging.debug("Base64 decodificado com sucesso.")
+                logging.debug("Base64 decoded successfully.")
             except Exception as decode_err:
-                logging.error(f"Erro ao decodificar base64: {decode_err}")
+                logging.error(f"Error decoding base64: {decode_err}")
                 return f"ERROR: Base64 decode failed"
 
-            # Tenta salvar com tratamento super agressivo
+            # Attempt to save with aggressive error handling
             try:
-                logging.debug("Tentando escrever arquivo no disco...")
+                logging.debug("Attempting to write file to disk...")
                 with open(file_path, 'wb') as f:
                     f.write(file_data)
-                logging.info(f"ARQUIVO SALVO COM SUCESSO: {file_path}")
+                logging.info(f"FILE SAVED SUCCESSFULLY: {file_path}")
                 return os.path.dirname(file_path)
 
             except PermissionError as perm_err:
-                logging.error(f"PermissionError (Bloqueio do Windows) em: {file_path} | Detalhe: {perm_err}")
+                logging.error(f"PermissionError (Windows lock) at: {file_path} | Detail: {perm_err}")
                 return "FALLBACK_BROWSER"
             except OSError as os_err:
-                logging.error(f"OSError (Falha de Disco/Caminho) em {file_path} | Detalhe: {os_err}")
+                logging.error(f"OSError (Disk/Path failure) at {file_path} | Detail: {os_err}")
                 return "FALLBACK_BROWSER"
             except Exception as write_err:
-                logging.error(f"Erro Desconhecido ao escrever {file_path} | Detalhe: {write_err}")
+                logging.error(f"Unknown error writing {file_path} | Detail: {write_err}")
                 return "FALLBACK_BROWSER"
 
         except Exception as e:
-            logging.error(f"Erro Crítico geral em save_file: {str(e)}", exc_info=True)
+            logging.error(f"Critical error in save_file: {str(e)}", exc_info=True)
             return f"ERROR: {str(e)}"
 
-# --- BLOQUEIOS DE SEGURANÇA ---
+# --- SECURITY BLOCKS ---
 JS_SECURITY_INJECTION = """
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.onkeydown = function(e) {
@@ -110,7 +110,7 @@ def bind_events(window):
         try:
             window.evaluate_js(JS_SECURITY_INJECTION)
         except Exception as e:
-            logging.error(f"Erro ao injetar JS: {str(e)}")
+            logging.error(f"Error injecting JS: {str(e)}")
             
     window.events.loaded += on_loaded
 
@@ -137,7 +137,7 @@ def main():
         webview.start(debug=False)
         
     except Exception as e:
-        logging.error(f"Erro Crítico na Inicialização: {str(e)}")
+        logging.error(f"Critical initialization error: {str(e)}")
         sys.exit(1)
 
 if __name__ == '__main__':

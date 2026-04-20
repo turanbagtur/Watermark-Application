@@ -825,7 +825,7 @@
             z-index: 9999;
             max-width: 400px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            /* Opacidade total para máxima clareza */
+            /* Full opacity for maximum clarity */
             opacity: 1; 
             animation: slideInAlert 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             display: flex;
@@ -834,7 +834,7 @@
             pointer-events: auto;
         }
 
-        /* Mantemos as cores, mas o sistema usará a opacidade do elemento pai */
+        /* We keep the colors, but the system will use the parent element opacity */
         .alert-error { background: var(--error); }
         .alert-warning { background: var(--warning); }
         .alert-success { background: var(--success); }
@@ -1915,7 +1915,7 @@
                 this.processedResults = [];
                 this.undoStack = [];
                 
-                // Configurações Padrão
+                // Default configuration
                 const defaultSettings = {
                     count: 1, opacity: 80, size: 45, rotation: 0,
                     mode: 'position', position: 'top-left', customPos: { x: 0.5, y: 0.5 },
@@ -1928,7 +1928,7 @@
                     contrast: 100, saturation: 100, outputQuality: 0.85, preserveFormat: true
                 };
 
-                // Recupera o último estado salvo
+                // Restore the last saved state
                 const savedState = JSON.parse(localStorage.getItem('watermark_last_state') || 'null');
                 this.settings = savedState ? { ...defaultSettings, ...savedState } : defaultSettings;
                 
@@ -1947,7 +1947,7 @@
                 }
                 this.updateUndoButton();
                 
-                // Salva silenciosamente as alterações para a próxima sessão
+                // Silently save changes for the next session
                 localStorage.setItem('watermark_last_state', JSON.stringify(this.settings));
             }
 
@@ -1969,7 +1969,7 @@
 
         // Error Handler Class
         class ErrorHandler {
-            static show(message, type = 'error', duration = 3000) { // Padrão agora é 3000ms (3s)
+            static show(message, type = 'error', duration = 3000) { // Default is now 3000ms (3s)
                 const alertDiv = document.createElement('div');
                 alertDiv.className = `alert alert-${type}`;
                 
@@ -1987,7 +1987,7 @@
                 
                 document.body.appendChild(alertDiv);
                 
-                // O temporizador agora respeita os 3 segundos por padrão
+                // The timer now respects the default 3 seconds
                 if (duration > 0) {
                     setTimeout(() => {
                         if (alertDiv.parentElement) {
@@ -2023,8 +2023,11 @@
                 const ext = file.name.toLowerCase().split('.').pop();
                 const isPSD = ext === 'psd';
                 
+                // Security: Sanitize file type/extension to prevent DOM injection
+                const sanitizedType = (file.type || ext || 'unknown').replace(/[<>]/g, '');
+                
                 if (!CONFIG.SUPPORTED_FORMATS.includes(file.type) && !isPSD) {
-                    throw new Error(`Unsupported file format: ${file.type || ext}`);
+                    throw new Error(`Unsupported file format: ${sanitizedType}`);
                 }
                 
                 if (file.size > maxSize) {
@@ -2348,7 +2351,7 @@
                     const reader = new FileReader();
 
                     if (isPSD) {
-                        ErrorHandler.show(`Convertendo PSD (${PerformanceManager.formatFileSize(file.size)}). Aguarde...`, 'info', 4000);
+                        ErrorHandler.show(`Converting PSD (${PerformanceManager.formatFileSize(file.size)}). Please wait...`, 'info', 4000);
                         reader.onload = function(e) {
                             try {
                                 const psd = new PSD(new Uint8Array(e.target.result));
@@ -2356,7 +2359,7 @@
                                 const base64Image = psd.image.toBase64();
                                 processFinalImage(base64Image, resolve, reject);
                             } catch (err) {
-                                ErrorHandler.show('Erro ao ler camadas do PSD. Verifique se o arquivo foi salvo com "Maximizar Compatibilidade".', 'error');
+                                ErrorHandler.show('Error reading PSD layers. Ensure the file was saved with "Maximize Compatibility".', 'error');
                                 reject(err);
                             }
                         };
@@ -2404,7 +2407,7 @@
                             }
                         };
                         img.onerror = () => {
-                            const error = new Error('Arquivo corrompido ou formato não suportado.');
+                            const error = new Error('Corrupted file or unsupported format.');
                             ErrorHandler.show(error.message);
                             rej(error);
                         };
@@ -2572,11 +2575,11 @@
                         const rawVal = parseInt(e.target.value);
                         const val = multiplier ? rawVal * multiplier : rawVal;
                         appState.settings[setting] = val;
-                        // O sufixo (%, px, °) já está no HTML na frente do span, 
-                        // então o JS só deve atualizar o NÚMERO, para não duplicar sinais.
+                        // The suffix (%, px, °) is already in the HTML before the span,
+                        // so JS should only update the NUMBER to avoid duplicating units.
                         valueSpan.textContent = val;
                         updatePreview();
-                        appState.saveState(); // Salva a alteração imediatamente na memória do navegador
+                        appState.saveState(); // Save the change immediately to browser memory
                     });
                 }
             });
@@ -3172,7 +3175,7 @@
                 <div class="download-btns" style="margin-bottom: 8px;">
                     <button class="download-btn" style="background: var(--primary-dark); width: 100%;" onclick="openAdjustModal(${index})">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg>
-                        Ajustar Posição
+                        Adjust Position
                     </button>
                 </div>
                 <div class="download-btns">
@@ -3217,7 +3220,7 @@
                     link.click();
                     
                     PerformanceManager.cleanup(tempCanvas);
-                    ErrorHandler.show(`${result.name} salvo na pasta "Downloads" do seu computador.`, 'success', 4000);
+                    ErrorHandler.show(`${result.name} saved to your "Downloads" folder.`, 'success', 4000);
                 };
                 tempImg.src = result.dataURL;
                 return;
@@ -3226,7 +3229,7 @@
             const finalFileName = `${fileName}.${format}`;
             const b64Data = dataURL.split(',')[1];
             
-            // Checa se a API nativa do Nuitka está exposta
+            // Check if the native Nuitka API is exposed
             if (window.save_file) {
                 const lastDir = localStorage.getItem('watermark_save_dir') || '';
                 window.save_file(finalFileName, b64Data, lastDir, format).then(result => {
@@ -3235,20 +3238,20 @@
                         link.download = finalFileName;
                         link.href = dataURL;
                         link.click();
-                        ErrorHandler.show(`${fileName}.${format} salvo na pasta "Downloads" do seu computador.`, 'success', 4000);
+                        ErrorHandler.show(`${fileName}.${format} saved to your "Downloads" folder.`, 'success', 4000);
                     } else if (result.startsWith("ERROR:")) {
                         ErrorHandler.show(result, 'error');
                     } else {
                         localStorage.setItem('watermark_save_dir', result);
-                        ErrorHandler.show(`${fileName}.${format} salvo com sucesso`, 'success', 2000);
+                        ErrorHandler.show(`${fileName}.${format} saved successfully`, 'success', 2000);
                     }
                 });
             } else {
-                // Fallback caso abra no navegador padrão
+                // Fallback if opened in the default browser
                 link.download = finalFileName;
                 link.href = dataURL;
                 link.click();
-                ErrorHandler.show(`${finalFileName} salvo na pasta "Downloads" do seu computador.`, 'success', 4000);
+                ErrorHandler.show(`${finalFileName} saved to your "Downloads" folder.`, 'success', 4000);
             }
         }
 
@@ -3269,7 +3272,7 @@
             try {
                 const fileName = `watermarked_images_${new Date().getTime()}.zip`;
                 
-                // Checa se a API nativa do Nuitka está exposta
+                // Check if the native Nuitka API is exposed
                 if (window.save_file) {
                     const b64Content = await zip.generateAsync({ type: 'base64' });
                     const lastDir = localStorage.getItem('watermark_save_dir') || '';
@@ -3282,22 +3285,22 @@
                             link.href = URL.createObjectURL(content);
                             link.download = fileName;
                             link.click();
-                            ErrorHandler.show('ZIP salvo com sucesso na sua pasta "Downloads".', 'success', 4000);
+                            ErrorHandler.show('ZIP saved successfully to your "Downloads" folder.', 'success', 4000);
                         } else if (result.startsWith("ERROR:")) {
                             ErrorHandler.show(result, 'error');
                         } else {
                             localStorage.setItem('watermark_save_dir', result);
-                            ErrorHandler.show('ZIP salvo com sucesso', 'success');
+                            ErrorHandler.show('ZIP saved successfully', 'success');
                         }
                     }
                 } else {
-                    // Fallback Navegador
+                    // Browser fallback
                     const content = await zip.generateAsync({ type: 'blob' });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(content);
                     link.download = fileName;
                     link.click();
-                    ErrorHandler.show('ZIP salvo com sucesso na sua pasta "Downloads".', 'success', 4000);
+                    ErrorHandler.show('ZIP saved successfully to your "Downloads" folder.', 'success', 4000);
                 }
             } catch (error) {
                 ErrorHandler.show('Could not create ZIP: ' + error.message, 'error');
@@ -4214,13 +4217,13 @@
         }
 
         // ============================================
-        // SISTEMA DE AJUSTE FINO INDIVIDUAL (UX/UI)
+        // INDIVIDUAL FINE-ADJUSTMENT SYSTEM (UX/UI)
         // ============================================
         let currentAdjustIndex = -1;
         let adjustPosPercent = { x: 0.5, y: 0.5 };
         let isDraggingAdjust = false;
         
-        // Variáveis do Motor de Viewport
+        // Viewport engine variables
         let viewZoom = 1;
         let viewPanX = 0;
         let viewPanY = 0;
@@ -4232,11 +4235,11 @@
             currentAdjustIndex = index;
             const originalData = appState.mainImages[index];
             if (!originalData) {
-                ErrorHandler.show('Dados da imagem original perdidos.', 'error');
+                ErrorHandler.show('Original image data lost.', 'error');
                 return;
             }
 
-            // Reseta posições para o padrão
+            // Reset positions to default
             adjustPosPercent = { x: 0.5, y: 0.5 }; 
             viewZoom = 1;
             viewPanX = 0;
@@ -4248,16 +4251,16 @@
             modal.innerHTML = `
                 <div class="loading-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg> Ajuste Fino de Posição</h3>
+                        <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg> Fine Position Adjustment</h3>
                         <button class="secondary-btn close-btn" style="padding: 5px 10px;" onclick="document.getElementById('adjustModal').remove()">✕</button>
                     </div>
                     
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--surface-2); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
                         <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">
-                            <strong>Botão Esquerdo:</strong> Move a marca | <strong>Scroll:</strong> Zoom | <strong>Botão Direito (ou Shift):</strong> Arrastar imagem
+                            <strong>Left Button:</strong> Move watermark | <strong>Scroll:</strong> Zoom | <strong>Right Button (or Shift):</strong> Drag image
                         </p>
                         <div style="display: flex; gap: 8px;">
-                            <button class="secondary-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetViewport()">Resetar View</button>
+                            <button class="secondary-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetViewport()">Reset View</button>
                         </div>
                     </div>
                     
@@ -4266,8 +4269,8 @@
                     </div>
                     
                     <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
-                        <button class="secondary-btn" style="padding: 12px 25px;" onclick="document.getElementById('adjustModal').remove()">Cancelar</button>
-                        <button class="process-btn" style="padding: 12px 25px;" onclick="saveIndividualAdjustment()">Salvar Alteração</button>
+                        <button class="secondary-btn" style="padding: 12px 25px;" onclick="document.getElementById('adjustModal').remove()">Cancel</button>
+                        <button class="process-btn" style="padding: 12px 25px;" onclick="saveIndividualAdjustment()">Save Changes</button>
                     </div>
                 </div>
             `;
@@ -4291,7 +4294,7 @@
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
-                // Aplica a câmera virtual (Transformação de Viewport)
+                // Apply virtual camera (viewport transform)
                 ctx.save();
                 ctx.translate(viewPanX, viewPanY);
                 ctx.scale(viewZoom, viewZoom);
@@ -4299,7 +4302,7 @@
                 // Desenha Imagem Original
                 ctx.drawImage(originalData.img, 0, 0, canvas.width, canvas.height);
                 
-                // Salva estado global e força posições do mouse
+                // Save global state and enforce mouse positions
                 const backupMode = appState.settings.mode;
                 const backupPos = appState.settings.position;
                 const backupCustom = { ...appState.settings.customPos };
@@ -4320,7 +4323,7 @@
 
             renderAdjustCanvas();
 
-            // Utilitário para pegar as coordenadas reais do mouse na tela
+            // Utility to get actual mouse coordinates on screen
             function getMousePos(e) {
                 const rect = canvas.getBoundingClientRect();
                 const scaleX = canvas.width / rect.width;
@@ -4331,17 +4334,17 @@
                 };
             }
 
-            // Sistema de Zoom (Scroll do Mouse)
+            // Zoom system (mouse wheel)
             canvas.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 const pos = getMousePos(e);
                 const zoomIntensity = 0.1;
                 const wheel = e.deltaY < 0 ? 1 : -1;
                 
-                // Limites do Zoom (0.5x até 5x)
+                // Zoom limits (0.5x to 5x)
                 const newZoom = Math.max(0.5, Math.min(viewZoom + (wheel * zoomIntensity), 5));
                 
-                // Matemátca para fazer o Zoom seguir o ponteiro do mouse
+                // Math to make zoom follow the mouse pointer
                 viewPanX = pos.x - (pos.x - viewPanX) * (newZoom / viewZoom);
                 viewPanY = pos.y - (pos.y - viewPanY) * (newZoom / viewZoom);
                 viewZoom = newZoom;
@@ -4349,24 +4352,24 @@
                 requestAnimationFrame(renderAdjustCanvas);
             }, { passive: false });
 
-            // Início do Arraste (Pan ou Mover Marca)
+            // Start dragging (pan or move watermark)
             canvas.addEventListener('mousedown', (e) => {
                 const pos = getMousePos(e);
                 
-                // Se clicar com botão direito OU segurar Shift, arrasta a tela (Pan)
+                // If right-click or hold Shift, pan the canvas
                 if (e.button === 2 || e.shiftKey) {
                     isPanning = true;
                     startPanX = pos.x - viewPanX;
                     startPanY = pos.y - viewPanY;
                     canvas.style.cursor = 'grabbing';
                 } else {
-                    // Senão, move a marca d'água
+                    // Otherwise, move the watermark
                     isDraggingAdjust = true;
                     updateAdjustPos(pos);
                 }
             });
 
-            // Previne o menu de contexto nativo no canvas (para o pan com botão direito funcionar liso)
+            // Prevent native context menu on canvas (for smooth right-click panning)
             canvas.addEventListener('contextmenu', e => e.preventDefault());
 
             window.addEventListener('mousemove', (e) => {
@@ -4408,7 +4411,7 @@
             const modal = document.getElementById('adjustModal');
             
             const btn = modal.querySelector('.process-btn');
-            btn.innerHTML = '<svg class="loading-spinner" style="width:20px;height:20px;margin:0;border-width:2px;" viewBox="0 0 50 50"></svg> Processando...';
+            btn.innerHTML = '<svg class="loading-spinner" style="width:20px;height:20px;margin:0;border-width:2px;" viewBox="0 0 50 50"></svg> Processing...';
             btn.disabled = true;
 
             try {
@@ -4437,12 +4440,12 @@
                     if (imgEl) imgEl.src = newResult.dataURL;
                 }
 
-                ErrorHandler.show(`Posição ajustada para ${originalData.name}`, 'success');
+                ErrorHandler.show(`Position adjusted for ${originalData.name}`, 'success');
                 modal.remove();
 
             } catch (error) {
-                ErrorHandler.show('Erro ao ajustar imagem: ' + error.message, 'error');
-                btn.innerHTML = 'Tentar Novamente';
+                ErrorHandler.show('Error adjusting image: ' + error.message, 'error');
+                btn.innerHTML = 'Try Again';
                 btn.disabled = false;
             }
         }
@@ -4458,7 +4461,7 @@
             setupKeyboardShortcuts();
             setupExportTab();
             
-            // Força a atualização da interface com os dados recuperados do localStorage
+            // Force UI refresh with data retrieved from localStorage
             if (typeof updateAllSliders === 'function') updateAllSliders();
             if (typeof updateModeButtons === 'function') updateModeButtons();
             if (typeof updatePositionButtons === 'function') updatePositionButtons();
