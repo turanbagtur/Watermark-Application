@@ -814,21 +814,27 @@
 
         .alert {
             position: fixed;
-            top: 20px;
-            right: 20px;
+            top: 30px;
+            left: 30px;
+            bottom: auto;
+            right: auto;
             padding: 18px 25px;
             border-radius: 12px;
             color: white;
             font-weight: 600;
-            z-index: 1000;
+            z-index: 9999;
             max-width: 400px;
-            box-shadow: 0 8px 25px var(--shadow);
-            animation: slideInAlert 0.4s ease-out;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            /* Full opacity for maximum clarity */
+            opacity: 1; 
+            animation: slideInAlert 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             display: flex;
             align-items: center;
             gap: 12px;
+            pointer-events: auto;
         }
 
+        /* We keep the colors, but the system will use the parent element opacity */
         .alert-error { background: var(--error); }
         .alert-warning { background: var(--warning); }
         .alert-success { background: var(--success); }
@@ -851,12 +857,12 @@
 
         @keyframes slideInAlert {
             from { 
-                transform: translateX(100%) scale(0.8);
+                transform: translateX(-100%) scale(0.9);
                 opacity: 0;
             }
             to { 
                 transform: translateX(0) scale(1);
-                opacity: 1;
+                opacity: 1; /* Finaliza em 100% */
             }
         }
 
@@ -1258,9 +1264,9 @@
                         </svg>
                     </div>
                     <h3>Upload Main Images</h3>
-                    <p>Click or drag images here (PNG, JPG, WEBP)</p>
-                    <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 10MB</p>
-                    <input type="file" id="mainImageInput" accept="image/*" multiple aria-label="Select main image files">
+                    <p>Click or drag images here (PNG, JPG, WEBP, PSD)</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 150MB</p>
+                    <input type="file" id="mainImageInput" accept="image/*,.psd" multiple aria-label="Select main image files">
                     <div class="image-gallery" id="mainGallery" role="list"></div>
                     <button class="clear-images-btn" onclick="clearAllImages(event)" style="display: none; margin-top: 15px; padding: 8px 16px; background: var(--error); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 10; position: relative;" id="clearImagesBtn">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
@@ -1349,19 +1355,19 @@
                 <div class="tab-content active" id="image-tab" role="tabpanel" aria-labelledby="image-tab-btn">
                     <div class="settings-grid">
                         <div class="setting-item">
-                            <label for="countSlider">Watermark Count: <span class="setting-value" id="countValue">5</span></label>
-                            <input type="range" id="countSlider" min="1" max="200" value="5" aria-describedby="count-desc">
+                            <label for="countSlider">Watermark Count: <span class="setting-value" id="countValue">1</span></label>
+                            <input type="range" id="countSlider" min="1" max="200" value="1" aria-describedby="count-desc">
                             <small id="count-desc">For Grid/Random modes. (In Position mode, it's always 1)</small>
                         </div>
 
                         <div class="setting-item">
-                            <label for="opacitySlider">Opacity: <span class="setting-value" id="opacityValue">50</span>%</label>
-                            <input type="range" id="opacitySlider" min="0" max="100" value="50">
+                            <label for="opacitySlider">Opacity: <span class="setting-value" id="opacityValue">80</span>%</label>
+                            <input type="range" id="opacitySlider" min="0" max="100" value="80">
                         </div>
 
                         <div class="setting-item">
-                            <label for="sizeSlider">Size: <span class="setting-value" id="sizeValue">15</span>%</label>
-                            <input type="range" id="sizeSlider" min="1" max="100" value="15">
+                            <label for="sizeSlider">Size: <span class="setting-value" id="sizeValue">45</span>%</label>
+                            <input type="range" id="sizeSlider" min="1" max="100" value="45">
                         </div>
 
                         <div class="setting-item">
@@ -1763,13 +1769,14 @@
     <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/psd.js/3.2.0/psd.min.js"></script>
     <script>
         // Enhanced Global Configuration
         const CONFIG = {
-            MAX_FILE_SIZE: 20 * 1024 * 1024, // 20MB
-            MAX_WATERMARK_SIZE: 10 * 1024 * 1024, // 10MB
-            SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'],
-            MAX_CANVAS_SIZE: 32000, // Increased for long images
+            MAX_FILE_SIZE: 150 * 1024 * 1024, // 150MB para PSDs
+            MAX_WATERMARK_SIZE: 10 * 1024 * 1024,
+            SUPPORTED_FORMATS: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/vnd.adobe.photoshop', 'application/x-photoshop', '.psd'],
+            MAX_CANVAS_SIZE: 32000,
             WORKER_ENABLED: typeof Worker !== 'undefined',
             // New performance and feature configs
             BATCH_SIZE: 5, // Process 5 images at a time
@@ -1908,9 +1915,9 @@
                 this.processedResults = [];
                 this.undoStack = [];
                 
-                // Configurações Padrão
+                // Default configuration
                 const defaultSettings = {
-                    count: 5, opacity: 50, size: 15, rotation: 0,
+                    count: 1, opacity: 80, size: 45, rotation: 0,
                     mode: 'position', position: 'top-left', customPos: { x: 0.5, y: 0.5 },
                     blendMode: 'normal', padding: 20, textContent: '', textSize: 24,
                     fontFamily: 'Arial', textColor: '#ffffff', textStroke: 2,
@@ -1921,7 +1928,7 @@
                     contrast: 100, saturation: 100, outputQuality: 0.85, preserveFormat: true
                 };
 
-                // Recupera o último estado salvo
+                // Restore the last saved state
                 const savedState = JSON.parse(localStorage.getItem('watermark_last_state') || 'null');
                 this.settings = savedState ? { ...defaultSettings, ...savedState } : defaultSettings;
                 
@@ -1940,7 +1947,7 @@
                 }
                 this.updateUndoButton();
                 
-                // Salva silenciosamente as alterações para a próxima sessão
+                // Silently save changes for the next session
                 localStorage.setItem('watermark_last_state', JSON.stringify(this.settings));
             }
 
@@ -1962,7 +1969,7 @@
 
         // Error Handler Class
         class ErrorHandler {
-            static show(message, type = 'error', duration = 5000) {
+            static show(message, type = 'error', duration = 3000) { // Default is now 3000ms (3s)
                 const alertDiv = document.createElement('div');
                 alertDiv.className = `alert alert-${type}`;
                 
@@ -1980,6 +1987,7 @@
                 
                 document.body.appendChild(alertDiv);
                 
+                // The timer now respects the default 3 seconds
                 if (duration > 0) {
                     setTimeout(() => {
                         if (alertDiv.parentElement) {
@@ -2006,20 +2014,20 @@
         // File Validation
         class FileValidator {
             static validate(file, isWatermark = false) {
-                if (!file || typeof file !== 'object') {
-                    throw new Error('Invalid file');
-                }
+                if (!file || typeof file !== 'object') throw new Error('Invalid file');
 
-                // Security: Check file name for malicious patterns
                 const dangerousExtensions = /\.(exe|bat|cmd|com|pif|scr|vbs|js|jar|php|asp|aspx)$/i;
-                if (dangerousExtensions.test(file.name)) {
-                    throw new Error('Security risk: This file type is not supported');
-                }
+                if (dangerousExtensions.test(file.name)) throw new Error('Security risk: This file type is not supported');
 
                 const maxSize = isWatermark ? CONFIG.MAX_WATERMARK_SIZE : CONFIG.MAX_FILE_SIZE;
+                const ext = file.name.toLowerCase().split('.').pop();
+                const isPSD = ext === 'psd';
                 
-                if (!CONFIG.SUPPORTED_FORMATS.includes(file.type)) {
-                    throw new Error(`Unsupported file format: ${file.type.replace(/[<>]/g, '')}`);
+                // Security: Sanitize file type/extension to prevent DOM injection
+                const sanitizedType = (file.type || ext || 'unknown').replace(/[<>]/g, '');
+                
+                if (!CONFIG.SUPPORTED_FORMATS.includes(file.type) && !isPSD) {
+                    throw new Error(`Unsupported file format: ${sanitizedType}`);
                 }
                 
                 if (file.size > maxSize) {
@@ -2027,10 +2035,7 @@
                     throw new Error(`File size cannot exceed ${maxSizeMB}MB (Current: ${(file.size/(1024*1024)).toFixed(1)}MB)`);
                 }
                 
-                if (file.size === 0) {
-                    throw new Error('File is empty or corrupted');
-                }
-                
+                if (file.size === 0) throw new Error('File is empty or corrupted');
                 return true;
             }
 
@@ -2339,79 +2344,80 @@
         async function loadImage(file, type) {
             try {
                 FileValidator.validate(file, type === 'watermark');
-                
                 const startTime = performance.now();
-                
+                const isPSD = file.name.toLowerCase().endsWith('.psd');
+
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
+
+                    if (isPSD) {
+                        ErrorHandler.show(`Converting PSD (${PerformanceManager.formatFileSize(file.size)}). Please wait...`, 'info', 4000);
+                        reader.onload = function(e) {
+                            try {
+                                const psd = new PSD(new Uint8Array(e.target.result));
+                                psd.parse();
+                                const base64Image = psd.image.toBase64();
+                                processFinalImage(base64Image, resolve, reject);
+                            } catch (err) {
+                                ErrorHandler.show('Error reading PSD layers. Ensure the file was saved with "Maximize Compatibility".', 'error');
+                                reject(err);
+                            }
+                        };
+                        reader.readAsArrayBuffer(file);
+                    } else {
+                        reader.onload = (e) => processFinalImage(e.target.result, resolve, reject);
+                        reader.readAsDataURL(file);
+                    }
+
+                    function processFinalImage(sourceSrc, res, rej) {
                         const img = new Image();
                         img.onload = () => {
                             try {
                                 FileValidator.validateImage(img);
-                                
                                 if (type === 'main') {
-                                    // Backup original watermark when first main image is loaded
                                     if (!appState.uploadedWatermark && appState.watermark) {
                                         appState.uploadedWatermark = appState.watermark;
                                     }
-                                    
                                     appState.mainImages.push({
                                         img,
-                                        name: file.name,
+                                        name: isPSD ? file.name.replace(/\.psd$/i, '.png') : file.name,
                                         size: file.size,
                                         lastModified: file.lastModified
                                     });
                                     updateMainGallery();
                                     updateProcessButtons();
-                                    
                                     const loadTime = PerformanceManager.measureTime(startTime);
-                                    ErrorHandler.show(
-                                        `${file.name} loaded (${loadTime}s)`,
-                                        'success',
-                                        3000
-                                    );
+                                    ErrorHandler.show(`${file.name} carregado (${loadTime}s)`, 'success', 3000);
                                 } else {
-                                    // Store original watermark for QR restore functionality
                                     if (appState.watermark && !appState.uploadedWatermark) {
                                         appState.uploadedWatermark = appState.watermark;
                                         document.getElementById('restoreWatermarkBtn').style.display = 'block';
                                     }
-                                    
                                     appState.watermark = img;
                                     updateWatermarkDisplay(img, file);
                                     updateProcessButtons();
-                                    
                                     const loadTime = PerformanceManager.measureTime(startTime);
-                                    ErrorHandler.show(
-                                        `Watermark loaded (${loadTime}s)`,
-                                        'success',
-                                        3000
-                                    );
+                                    ErrorHandler.show(`Watermark loaded (${loadTime}s)`, 'success', 3000);
                                 }
-                                
                                 updatePreview();
-                                resolve();
+                                res();
                             } catch (error) {
                                 ErrorHandler.show('Image loading error: ' + error.message);
-                                reject(error);
+                                rej(error);
                             }
                         };
-                        img.onerror = (e) => {
-                            const error = new Error('Image could not be loaded. Please check if the file is corrupted.');
+                        img.onerror = () => {
+                            const error = new Error('Corrupted file or unsupported format.');
                             ErrorHandler.show(error.message);
-                            reject(error);
+                            rej(error);
                         };
-                        img.src = e.target.result;
+                        img.src = sourceSrc;
+                    }
+                    reader.onerror = () => {
+                        ErrorHandler.show('File could not be read. Please try again.');
+                        reject(new Error('Read error'));
                     };
-                    reader.onerror = (e) => {
-                        const error = new Error('File could not be read. Please try again.');
-                        ErrorHandler.show(error.message);
-                        reject(error);
-                    };
-                    reader.readAsDataURL(file);
                 });
-                
             } catch (error) {
                 ErrorHandler.show('File loading error: ' + error.message);
                 throw error;
@@ -2569,13 +2575,11 @@
                         const rawVal = parseInt(e.target.value);
                         const val = multiplier ? rawVal * multiplier : rawVal;
                         appState.settings[setting] = val;
-                        const suffix = setting === 'rotation' ? '°' :
-                                      (setting === 'opacity' || setting.includes('Opacity') || setting.includes('brightness') || setting.includes('contrast') || setting.includes('saturation')) ? '%' :
-                                      setting.includes('Size') ? 'px' :
-                                      setting.includes('padding') || setting.includes('Padding') || setting.includes('Blur') || setting.includes('Offset') || setting.includes('Stroke') || setting.includes('Radius') ? 'px' : '';
-                        valueSpan.textContent = val + suffix;
+                        // The suffix (%, px, °) is already in the HTML before the span,
+                        // so JS should only update the NUMBER to avoid duplicating units.
+                        valueSpan.textContent = val;
                         updatePreview();
-                        appState.saveState();
+                        appState.saveState(); // Save the change immediately to browser memory
                     });
                 }
             });
@@ -3171,7 +3175,7 @@
                 <div class="download-btns" style="margin-bottom: 8px;">
                     <button class="download-btn" style="background: var(--primary-dark); width: 100%;" onclick="openAdjustModal(${index})">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg>
-                        Ajustar Posição
+                        Adjust Position
                     </button>
                 </div>
                 <div class="download-btns">
@@ -3183,6 +3187,7 @@
             elements.resultsGrid.appendChild(resultItem);
         }
 
+        // Download Functions
         // Download Functions
         function downloadSingle(index, format) {
             const result = appState.processedResults[index];
@@ -3198,68 +3203,55 @@
                 tempImg.onload = function() {
                     const tempCanvas = document.createElement('canvas');
                     const tempCtx = tempCanvas.getContext('2d');
-                    
                     tempCanvas.width = tempImg.width;
                     tempCanvas.height = tempImg.height;
                     
                     if (format === 'jpg') {
-                        // Fill with white background for JPG
                         tempCtx.fillStyle = '#FFFFFF';
                         tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
                     }
-                    
-                    // Draw the image
                     tempCtx.drawImage(tempImg, 0, 0);
                     
-                    // Generate the appropriate format
-                    if (format === 'jpg') {
-                        dataURL = tempCanvas.toDataURL('image/jpeg', appState.settings.outputQuality);
-                    } else if (format === 'webp') {
-                        dataURL = tempCanvas.toDataURL('image/webp', appState.settings.outputQuality);
-                    }
+                    if (format === 'jpg') dataURL = tempCanvas.toDataURL('image/jpeg', appState.settings.outputQuality);
+                    else if (format === 'webp') dataURL = tempCanvas.toDataURL('image/webp', appState.settings.outputQuality);
                     
-                    // Download the file
                     link.download = `${fileName}.${format}`;
                     link.href = dataURL;
                     link.click();
                     
                     PerformanceManager.cleanup(tempCanvas);
-                    ErrorHandler.show(`${result.name} downloaded`, 'success', 2000);
+                    ErrorHandler.show(`${result.name} saved to your "Downloads" folder.`, 'success', 4000);
                 };
-                
                 tempImg.src = result.dataURL;
-                return; // Exit early for async processing
+                return;
             }
             
             const finalFileName = `${fileName}.${format}`;
-            const b64Data = dataURL.split(',')[1]; // Extrai só a parte útil do Base64
+            const b64Data = dataURL.split(',')[1];
             
-            // Checa se estamos no Desktop (Python)
-            if (window.pywebview && window.pywebview.api) {
+            // Check if the native Nuitka API is exposed
+            if (window.save_file) {
                 const lastDir = localStorage.getItem('watermark_save_dir') || '';
-                
-                window.pywebview.api.save_file(finalFileName, b64Data, lastDir, format).then(result => {
+                window.save_file(finalFileName, b64Data, lastDir, format).then(result => {
                     if (result === "CANCELLED") return; 
-                    
                     if (result === "FALLBACK_BROWSER") {
-                        ErrorHandler.show('O Windows bloqueou a pasta. Usando download seguro...', 'warning', 3000);
-                        // Burlar o bloqueio acionando o download nativo do motor web
                         link.download = finalFileName;
                         link.href = dataURL;
                         link.click();
+                        ErrorHandler.show(`${fileName}.${format} saved to your "Downloads" folder.`, 'success', 4000);
                     } else if (result.startsWith("ERROR:")) {
                         ErrorHandler.show(result, 'error');
                     } else {
                         localStorage.setItem('watermark_save_dir', result);
-                        ErrorHandler.show(`${result.name} salvo com sucesso`, 'success', 2000);
+                        ErrorHandler.show(`${fileName}.${format} saved successfully`, 'success', 2000);
                     }
                 });
             } else {
-                // Fallback caso abra no navegador padrão
+                // Fallback if opened in the default browser
                 link.download = finalFileName;
                 link.href = dataURL;
                 link.click();
-                ErrorHandler.show(`${result.name} downloaded`, 'success', 2000);
+                ErrorHandler.show(`${finalFileName} saved to your "Downloads" folder.`, 'success', 4000);
             }
         }
 
@@ -3280,36 +3272,35 @@
             try {
                 const fileName = `watermarked_images_${new Date().getTime()}.zip`;
                 
-                // Checa se estamos no Desktop (Python)
-                if (window.pywebview && window.pywebview.api) {
+                // Check if the native Nuitka API is exposed
+                if (window.save_file) {
                     const b64Content = await zip.generateAsync({ type: 'base64' });
                     const lastDir = localStorage.getItem('watermark_save_dir') || '';
-                    
-                    const result = await window.pywebview.api.save_file(fileName, b64Content, lastDir, 'zip');
+                    const result = await window.save_file(fileName, b64Content, lastDir, 'zip');
                     
                     if (result !== "CANCELLED") {
                         if (result === "FALLBACK_BROWSER") {
-                            ErrorHandler.show('O Windows bloqueou a pasta. Usando modo de segurança...', 'warning');
                             const content = await zip.generateAsync({ type: 'blob' });
                             const link = document.createElement('a');
                             link.href = URL.createObjectURL(content);
                             link.download = fileName;
                             link.click();
+                            ErrorHandler.show('ZIP saved successfully to your "Downloads" folder.', 'success', 4000);
                         } else if (result.startsWith("ERROR:")) {
                             ErrorHandler.show(result, 'error');
                         } else {
                             localStorage.setItem('watermark_save_dir', result);
-                            ErrorHandler.show('ZIP salvo com sucesso', 'success');
+                            ErrorHandler.show('ZIP saved successfully', 'success');
                         }
                     }
                 } else {
-                    // Fallback Navegador
+                    // Browser fallback
                     const content = await zip.generateAsync({ type: 'blob' });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(content);
                     link.download = fileName;
                     link.click();
-                    ErrorHandler.show('ZIP file downloaded', 'success');
+                    ErrorHandler.show('ZIP saved successfully to your "Downloads" folder.', 'success', 4000);
                 }
             } catch (error) {
                 ErrorHandler.show('Could not create ZIP: ' + error.message, 'error');
@@ -3551,9 +3542,9 @@
                     </svg>
                 </div>
                 <h3>Upload Main Images</h3>
-                <p>Click or drag images here (PNG, JPG, WEBP)</p>
-                <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 10MB</p>
-                <input type="file" id="mainImageInput" accept="image/*" multiple aria-label="Select main image files">
+                <p>Click or drag images here (PNG, JPG, WEBP, PSD)</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Max size: 150MB</p>
+                <input type="file" id="mainImageInput" accept="image/*,.psd" multiple aria-label="Select main image files">
                 <div class="image-gallery" id="mainGallery" role="list"></div>
                 <button class="clear-images-btn" onclick="clearAllImages(event)" style="display: none; margin-top: 15px; padding: 8px 16px; background: var(--error); color: white; border: none; border-radius: 8px; cursor: pointer; z-index: 10; position: relative;" id="clearImagesBtn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 8px;">
@@ -4226,41 +4217,60 @@
         }
 
         // ============================================
-        // SISTEMA DE AJUSTE FINO INDIVIDUAL (UX/UI)
+        // INDIVIDUAL FINE-ADJUSTMENT SYSTEM (UX/UI)
         // ============================================
         let currentAdjustIndex = -1;
         let adjustPosPercent = { x: 0.5, y: 0.5 };
         let isDraggingAdjust = false;
+        
+        // Viewport engine variables
+        let viewZoom = 1;
+        let viewPanX = 0;
+        let viewPanY = 0;
+        let isPanning = false;
+        let startPanX = 0;
+        let startPanY = 0;
 
         function openAdjustModal(index) {
             currentAdjustIndex = index;
             const originalData = appState.mainImages[index];
             if (!originalData) {
-                ErrorHandler.show('Original image data lost. Clear and upload again.', 'error');
+                ErrorHandler.show('Original image data lost.', 'error');
                 return;
             }
 
-            // Define posição inicial baseada na configuração atual para não assustar o usuário
+            // Reset positions to default
             adjustPosPercent = { x: 0.5, y: 0.5 }; 
+            viewZoom = 1;
+            viewPanX = 0;
+            viewPanY = 0;
 
             const modal = document.createElement('div');
             modal.className = 'loading-overlay';
             modal.id = 'adjustModal';
             modal.innerHTML = `
                 <div class="loading-content" style="max-width: 900px; width: 95%; max-height: 90vh; display: flex; flex-direction: column;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg> Ajuste Fino de Posição</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle;"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M19 9l3 3-3 3M9 19l3 3 3-3M2 12h20M12 2v20"></path></svg> Fine Position Adjustment</h3>
                         <button class="secondary-btn close-btn" style="padding: 5px 10px;" onclick="document.getElementById('adjustModal').remove()">✕</button>
                     </div>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 15px;">Clique e arraste a marca d'água para a posição ideal. Isso afetará APENAS esta imagem.</p>
                     
-                    <div style="position: relative; overflow: hidden; border-radius: 10px; background: var(--surface-2); flex-grow: 1; display: flex; justify-content: center; align-items: center; border: 2px dashed var(--border);">
-                        <canvas id="adjustCanvas" style="cursor: move; max-width: 100%; max-height: 60vh; box-shadow: 0 4px 15px var(--shadow);"></canvas>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: var(--surface-2); padding: 10px; border-radius: 8px; border: 1px solid var(--border);">
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">
+                            <strong>Left Button:</strong> Move watermark | <strong>Scroll:</strong> Zoom | <strong>Right Button (or Shift):</strong> Drag image
+                        </p>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="secondary-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="resetViewport()">Reset View</button>
+                        </div>
+                    </div>
+                    
+                    <div id="canvasWrapper" style="position: relative; overflow: hidden; border-radius: 10px; background: var(--surface-2); flex-grow: 1; display: flex; justify-content: center; align-items: center; border: 2px dashed var(--border); min-height: 50vh;">
+                        <canvas id="adjustCanvas" style="cursor: crosshair; max-width: 100%; max-height: 60vh; box-shadow: 0 4px 15px var(--shadow);"></canvas>
                     </div>
                     
                     <div style="display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px;">
-                        <button class="secondary-btn" style="padding: 12px 25px;" onclick="document.getElementById('adjustModal').remove()">Cancelar</button>
-                        <button class="process-btn" style="padding: 12px 25px;" onclick="saveIndividualAdjustment()">Salvar Alteração</button>
+                        <button class="secondary-btn" style="padding: 12px 25px;" onclick="document.getElementById('adjustModal').remove()">Cancel</button>
+                        <button class="process-btn" style="padding: 12px 25px;" onclick="saveIndividualAdjustment()">Save Changes</button>
                     </div>
                 </div>
             `;
@@ -4269,21 +4279,34 @@
             const canvas = document.getElementById('adjustCanvas');
             const ctx = canvas.getContext('2d');
             
-            // Otimiza tamanho do canvas para o modal
+            // Otimiza o tamanho base do canvas
             const opt = PerformanceManager.optimizeCanvas(originalData.img);
             canvas.width = opt.width;
             canvas.height = opt.height;
 
+            window.resetViewport = function() {
+                viewZoom = 1; viewPanX = 0; viewPanY = 0;
+                requestAnimationFrame(renderAdjustCanvas);
+            };
+
             function renderAdjustCanvas() {
+                // Limpa tudo com a cor de fundo nativa
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Apply virtual camera (viewport transform)
+                ctx.save();
+                ctx.translate(viewPanX, viewPanY);
+                ctx.scale(viewZoom, viewZoom);
+                
+                // Desenha Imagem Original
                 ctx.drawImage(originalData.img, 0, 0, canvas.width, canvas.height);
                 
-                // Salva estado global
+                // Save global state and enforce mouse positions
                 const backupMode = appState.settings.mode;
                 const backupPos = appState.settings.position;
                 const backupCustom = { ...appState.settings.customPos };
 
-                // Força modo customizado temporariamente para desenhar onde o mouse está
                 appState.settings.mode = 'position';
                 appState.settings.position = 'custom';
                 appState.settings.customPos = adjustPosPercent;
@@ -4294,33 +4317,89 @@
                 appState.settings.mode = backupMode;
                 appState.settings.position = backupPos;
                 appState.settings.customPos = backupCustom;
+                
+                ctx.restore();
             }
 
             renderAdjustCanvas();
 
-            // Lógica de Arraste (Drag & Drop) no Canvas do Modal
-            canvas.addEventListener('mousedown', (e) => {
-                isDraggingAdjust = true;
-                updateAdjustPos(e);
-            });
-            canvas.addEventListener('mousemove', (e) => {
-                if (isDraggingAdjust) updateAdjustPos(e);
-            });
-            window.addEventListener('mouseup', () => {
-                isDraggingAdjust = false;
-            });
-
-            function updateAdjustPos(e) {
+            // Utility to get actual mouse coordinates on screen
+            function getMousePos(e) {
                 const rect = canvas.getBoundingClientRect();
-                // Calcula a porcentagem X e Y real considerando o redimensionamento do CSS (max-width/max-height)
                 const scaleX = canvas.width / rect.width;
                 const scaleY = canvas.height / rect.height;
+                return {
+                    x: (e.clientX - rect.left) * scaleX,
+                    y: (e.clientY - rect.top) * scaleY
+                };
+            }
+
+            // Zoom system (mouse wheel)
+            canvas.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                const pos = getMousePos(e);
+                const zoomIntensity = 0.1;
+                const wheel = e.deltaY < 0 ? 1 : -1;
                 
-                const x = ((e.clientX - rect.left) * scaleX) / canvas.width;
-                const y = ((e.clientY - rect.top) * scaleY) / canvas.height;
+                // Zoom limits (0.5x to 5x)
+                const newZoom = Math.max(0.5, Math.min(viewZoom + (wheel * zoomIntensity), 5));
                 
-                adjustPosPercent.x = Math.max(0, Math.min(1, x));
-                adjustPosPercent.y = Math.max(0, Math.min(1, y));
+                // Math to make zoom follow the mouse pointer
+                viewPanX = pos.x - (pos.x - viewPanX) * (newZoom / viewZoom);
+                viewPanY = pos.y - (pos.y - viewPanY) * (newZoom / viewZoom);
+                viewZoom = newZoom;
+                
+                requestAnimationFrame(renderAdjustCanvas);
+            }, { passive: false });
+
+            // Start dragging (pan or move watermark)
+            canvas.addEventListener('mousedown', (e) => {
+                const pos = getMousePos(e);
+                
+                // If right-click or hold Shift, pan the canvas
+                if (e.button === 2 || e.shiftKey) {
+                    isPanning = true;
+                    startPanX = pos.x - viewPanX;
+                    startPanY = pos.y - viewPanY;
+                    canvas.style.cursor = 'grabbing';
+                } else {
+                    // Otherwise, move the watermark
+                    isDraggingAdjust = true;
+                    updateAdjustPos(pos);
+                }
+            });
+
+            // Prevent native context menu on canvas (for smooth right-click panning)
+            canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+            window.addEventListener('mousemove', (e) => {
+                if (!document.getElementById('adjustModal')) return; // Safety out
+                const pos = getMousePos(e);
+                
+                if (isPanning) {
+                    viewPanX = pos.x - startPanX;
+                    viewPanY = pos.y - startPanY;
+                    requestAnimationFrame(renderAdjustCanvas);
+                } else if (isDraggingAdjust) {
+                    updateAdjustPos(pos);
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDraggingAdjust = false;
+                if (isPanning) {
+                    isPanning = false;
+                    canvas.style.cursor = 'crosshair';
+                }
+            });
+
+            function updateAdjustPos(pos) {
+                // Converte as coordenadas da tela arrastada/zoomada para a coordenada real da imagem
+                const realX = (pos.x - viewPanX) / viewZoom;
+                const realY = (pos.y - viewPanY) / viewZoom;
+                
+                adjustPosPercent.x = Math.max(0, Math.min(1, realX / canvas.width));
+                adjustPosPercent.y = Math.max(0, Math.min(1, realY / canvas.height));
                 
                 requestAnimationFrame(renderAdjustCanvas);
             }
@@ -4332,48 +4411,41 @@
             const modal = document.getElementById('adjustModal');
             
             const btn = modal.querySelector('.process-btn');
-            btn.innerHTML = '<svg class="loading-spinner" style="width:20px;height:20px;margin:0;border-width:2px;" viewBox="0 0 50 50"></svg> Processando...';
+            btn.innerHTML = '<svg class="loading-spinner" style="width:20px;height:20px;margin:0;border-width:2px;" viewBox="0 0 50 50"></svg> Processing...';
             btn.disabled = true;
 
             try {
-                // 1. Faz backup do estado global
                 const backupMode = appState.settings.mode;
                 const backupPos = appState.settings.position;
                 const backupCustom = { ...appState.settings.customPos };
 
-                // 2. Aplica a posição específica escolhida neste modal
                 appState.settings.mode = 'position';
                 appState.settings.position = 'custom';
                 appState.settings.customPos = adjustPosPercent;
 
-                // 3. Remove a imagem cacheada antiga se existir, para forçar reprocessamento
                 const oldCacheKey = `${originalData.name}_${originalData.lastModified}_${JSON.stringify(appState.settings)}`;
                 imageCache.cache.delete(oldCacheKey);
 
-                // 4. Reprocessa APENAS esta imagem
                 const newResult = await processImage(originalData);
 
-                // 5. Restaura o estado global
                 appState.settings.mode = backupMode;
                 appState.settings.position = backupPos;
                 appState.settings.customPos = backupCustom;
 
-                // 6. Atualiza o array de resultados e a UI
                 appState.processedResults[index] = newResult;
                 
-                // Recarrega apenas a imagem específica no DOM
                 const resultItems = document.getElementById('resultsGrid').children;
                 if (resultItems[index]) {
                     const imgEl = resultItems[index].querySelector('img');
                     if (imgEl) imgEl.src = newResult.dataURL;
                 }
 
-                ErrorHandler.show(`Posição ajustada para ${originalData.name}`, 'success');
+                ErrorHandler.show(`Position adjusted for ${originalData.name}`, 'success');
                 modal.remove();
 
             } catch (error) {
-                ErrorHandler.show('Erro ao ajustar imagem: ' + error.message, 'error');
-                btn.innerHTML = 'Tentar Novamente';
+                ErrorHandler.show('Error adjusting image: ' + error.message, 'error');
+                btn.innerHTML = 'Try Again';
                 btn.disabled = false;
             }
         }
@@ -4389,7 +4461,7 @@
             setupKeyboardShortcuts();
             setupExportTab();
             
-            // Sincroniza a interface (sliders e botões) com os dados carregados do cache
+            // Force UI refresh with data retrieved from localStorage
             if (typeof updateAllSliders === 'function') updateAllSliders();
             if (typeof updateModeButtons === 'function') updateModeButtons();
             if (typeof updatePositionButtons === 'function') updatePositionButtons();
