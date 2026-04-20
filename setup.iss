@@ -2,7 +2,7 @@
 ; >>> CRÍTICO: Este AppId é o que faz o app aparecer na lista do Windows 11 <<<
 AppId={{F9A8B7C6-D5E4-1234-5678-90ABCDEF1234}
 AppName=Advanced Professional Watermark
-AppVersion=1.0.9
+AppVersion=1.0.11
 AppPublisher=VENSEV
 AppSupportURL=https://ko-fi.com/solderett
 
@@ -23,15 +23,17 @@ PrivilegesRequired=admin
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
+; ... (suas configurações [Setup] continuam iguais) ...
+
 [Files]
-; Puxa o seu arquivo real de 12.30MB
-Source: "dist\WatermarkApp.exe"; DestDir: "{app}"; Flags: ignoreversion
+; >>>Pega a pasta do Nuitka e copia tudo o que tem dentro dela <<<
+Source: "main.dist\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-; Cria os atalhos reais para o app, não para o instalador
-Name: "{group}\Advanced Professional Watermark"; Filename: "{app}\WatermarkApp.exe"
+; >>> MUDANÇA AQUI: Aponta para o main.exe gerado pelo Nuitka <<<
+Name: "{group}\Advanced Professional Watermark"; Filename: "{app}\main.exe"
 Name: "{group}\{cm:UninstallProgram,Advanced Professional Watermark}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Advanced Professional Watermark"; Filename: "{app}\WatermarkApp.exe"; Tasks: desktopicon
+Name: "{autodesktop}\Advanced Professional Watermark"; Filename: "{app}\main.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\WatermarkApp.exe"; Description: "{cm:LaunchProgram,Advanced Professional Watermark}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\main.exe"; Description: "{cm:LaunchProgram,Advanced Professional Watermark}"; Flags: nowait postinstall skipifsilent

@@ -1,0 +1,8 @@
+# Ambientes virtuais Python
+venv/
+.venv/
+env/
+InstaladorFinal/
+logs/
+main.build/
+main.dist/
